@@ -1,3 +1,0 @@
-/home/bidin/Documents/2023_01/Vinebound-Explorer/build/CMakeFiles/main.dir
-/home/bidin/Documents/2023_01/Vinebound-Explorer/build/CMakeFiles/edit_cache.dir
-/home/bidin/Documents/2023_01/Vinebound-Explorer/build/CMakeFiles/rebuild_cache.dir
