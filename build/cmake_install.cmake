@@ -1,4 +1,4 @@
-# Install script for directory: /home/bidin/Documents/2023-1/Vinebound-Explorer
+# Install script for directory: /home/bidin/Documents/2023_01/Vinebound-Explorer
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/bidin/Documents/2023-1/Vinebound-Explorer/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/bidin/Documents/2023_01/Vinebound-Explorer/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
