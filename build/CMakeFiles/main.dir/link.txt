@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Wextra CMakeFiles/main.dir/src/Game.cpp.o CMakeFiles/main.dir/src/Main.cpp.o CMakeFiles/main.dir/src/physics/Physics.cpp.o -o main  -lGL -lSDL2 -lm 

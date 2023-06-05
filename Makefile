@@ -7,7 +7,7 @@ WFLAGS = -Wall -Wextra
 # Optimization flags
 OPTFLAGS = -O3 -march=native -finline-functions -funroll-loops -flto
 # Include flags
-LDFLAGS = -lGL -lglut -lGLU -lm
+LDFLAGS = -lGL -lSDL2 -lGLU -lm
 # Source directory
 SRC_DIR = src
 OBJECTS = $(patsubst $(SRC_DIR)/%.cpp, $(SRC_DIR)/%.o, $(wildcard $(SRC_DIR)/*.cpp))
@@ -19,7 +19,7 @@ run: $(BINARY)
 	./$^
 
 main: $(OBJECTS)
-	$(WFLAGS) $(CPP) $(CPPSTD) $(OPTFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CPP) $(WFLAGS) $(CPPSTD) $(OPTFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
 	$(CPP) $(CPPSTD) -c $< -o $@
@@ -29,5 +29,5 @@ $(SRC_DIR)/%.o: $(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
 clean:
 	rm -f $(OBJECTS) $(BINARY)
 
-foda:
+it:
 	clear && make clean && make && ./$(BINARY)
