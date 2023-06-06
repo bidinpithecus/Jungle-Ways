@@ -1,6 +1,6 @@
 #include "../include/Game.hpp"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
 	argc--, argv--;
 	Game game{1280, 720};
 
