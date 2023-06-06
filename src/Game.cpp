@@ -25,7 +25,7 @@ bool Game::OnInit() {
 
 	if (TTF_Init() < 0) return false;
 
-	pFont = TTF_OpenFont("../assets/fonts/FiraCode_SemiBold.ttf", 32);
+	pFont = TTF_OpenFont("../assets/fonts/tarzan-regular.ttf", 50);
 	if (!pFont) return false;
 
 	return true;
@@ -222,18 +222,15 @@ void Game::RenderInGameMenu() {
 	int optionY = menuY;
 
 	// Option 1: Start Game
-	const char* startGameText = "Resume Game";
-	RenderMenuOption(startGameText, menuX, optionY, menuWidth, optionHeight, textColor);
+	RenderMenuOption("Resume Game", menuX, optionY, menuWidth, optionHeight, textColor);
 	optionY += optionHeight;
 
 	// Option 2: Options
-	const char* optionsText = "Options";
-	RenderMenuOption(optionsText, menuX, optionY, menuWidth, optionHeight, textColor);
+	RenderMenuOption("Options", menuX, optionY, menuWidth, optionHeight, textColor);
 	optionY += optionHeight;
 
 	// Option 3: Exit
-	const char* mainMenuText = "Back to Main Menu";
-	RenderMenuOption(mainMenuText, menuX, optionY, menuWidth, optionHeight, textColor);
+	RenderMenuOption("Main Menu", menuX, optionY, menuWidth, optionHeight, textColor);
 }
 
 void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int height, SDL_Color textColor) {
