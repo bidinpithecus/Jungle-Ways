@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
+#include "Utils.hpp"
 
 enum class GAME_STATE {
 	IN_GAME_MENU,
@@ -22,6 +23,7 @@ public:
 	void OnRender();
 	void OnExit();
 	void RenderMainMenu();
+	void RenderMenuOption(const char* optionText, int x, int y, int width, int height, SDL_Color textColor);
 	void RenderOptionsMenu();
 	void RenderInGameMenu();
 	void RenderScene();
@@ -29,7 +31,10 @@ public:
 private:
 	int width;
 	int height;
-
+    const float IN_GAME_MENU_WIDTH_RATIO = 0.33f;
+    const float IN_GAME_MENU_HEIGHT_RATIO = 0.80f;
+    const float MAIN_MENU_WIDTH_RATIO = 0.90f;
+    const float MAIN_MENU_HEIGHT_RATIO = 0.90f;
 	bool isRunning;
 	GAME_STATE gameState;
 	GAME_STATE previousState;

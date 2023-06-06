@@ -25,7 +25,7 @@ bool Game::OnInit() {
 
 	if (TTF_Init() < 0) return false;
 
-	pFont = TTF_OpenFont("../assets/fonts/FiraCode_SemiBold.ttf", 24);
+	pFont = TTF_OpenFont("../assets/fonts/FiraCode_SemiBold.ttf", 32);
 	if (!pFont) return false;
 
 	return true;
@@ -100,7 +100,7 @@ void Game::OnEvent(SDL_Event* event) {
 }
 
 void Game::OnLoop() {
-	// Perform game logic here
+	// Game logic here
 }
 
 void Game::OnRender() {
@@ -130,121 +130,128 @@ void Game::OnExit() {
 void Game::RenderMainMenu() {
 	SDL_Color textColor = { 0, 0, 0, 255 };
 
-	SDL_Surface* surface = NULL;
-	SDL_Texture* texture = NULL;
+	// Calculate menu dimensions
+	int menuWidth = static_cast<int>(width * MAIN_MENU_WIDTH_RATIO);
+	int menuHeight = static_cast<int>(height * MAIN_MENU_HEIGHT_RATIO);
 
-	// Start Game button
-	const char* startGameText = "Start Game";
-	surface = TTF_RenderText_Solid(pFont, startGameText, textColor);
-	texture = SDL_CreateTextureFromSurface(pRenderer, surface);
-	int textWidth = surface->w;
-	int textHeight = surface->h;
-	SDL_FreeSurface(surface);
-	startGameRect = { (width - textWidth) / 2, (height - textHeight) / 2 - 50, textWidth, textHeight };
-	SDL_RenderCopy(pRenderer, texture, NULL, &startGameRect);
-	SDL_DestroyTexture(texture);
+	// Calculate menu position
+	int menuX = (width - menuWidth) / 2;
+	int menuY = (height - menuHeight) / 2;
 
-	// Options button
-	const char* optionsText = "Options";
-	surface = TTF_RenderText_Solid(pFont, optionsText, textColor);
-	texture = SDL_CreateTextureFromSurface(pRenderer, surface);
-	textWidth = surface->w;
-	textHeight = surface->h;
-	SDL_FreeSurface(surface);
-	optionsRect = { (width - textWidth) / 2, (height - textHeight) / 2, textWidth, textHeight };
-	SDL_RenderCopy(pRenderer, texture, NULL, &optionsRect);
-	SDL_DestroyTexture(texture);
+	// Render the menu background
+	SDL_SetRenderDrawColor(pRenderer, 192, 192, 192, 255);
+	SDL_Rect menuRect = { menuX, menuY, menuWidth, menuHeight };
+	SDL_RenderFillRect(pRenderer, &menuRect);
 
-	// Exit button
-	const char* exitText = "Exit Game";
-	surface = TTF_RenderText_Solid(pFont, exitText, textColor);
-	texture = SDL_CreateTextureFromSurface(pRenderer, surface);
-	textWidth = surface->w;
-	textHeight = surface->h;
-	SDL_FreeSurface(surface);
-	exitRect = { (width - textWidth) / 2, (height - textHeight) / 2 + 50, textWidth, textHeight };
-	SDL_RenderCopy(pRenderer, texture, NULL, &exitRect);
-	SDL_DestroyTexture(texture);
+	// Render each option
+	int optionCount = 3;
+	int optionHeight = menuHeight / optionCount;
+	int optionY = menuY;
+
+	// Option 1: Start
+	RenderMenuOption("Start", menuX, optionY, menuWidth, optionHeight, textColor);
+	optionY += optionHeight;
+
+	// Option 2: Options
+	RenderMenuOption("Options", menuX, optionY, menuWidth, optionHeight, textColor);
+	optionY += optionHeight;
+
+	// Option 3: Exit the app
+	RenderMenuOption("Exit", menuX, optionY, menuWidth, optionHeight, textColor);
 }
 
 void Game::RenderOptionsMenu() {
 	SDL_Color textColor = { 0, 0, 0, 255 };
+	int menuWidth = width;
+	int menuHeight = height;
 
-	SDL_Surface* surface = NULL;
-	SDL_Texture* texture = NULL;
+	// Calculate menu dimensions
+	if (previousState == GAME_STATE::IN_GAME_MENU) {
+		menuWidth = static_cast<int>(width * IN_GAME_MENU_WIDTH_RATIO);
+		menuHeight = static_cast<int>(height * IN_GAME_MENU_HEIGHT_RATIO);
+	} else if (previousState == GAME_STATE::MAIN_MENU) {
+		menuWidth = static_cast<int>(width * MAIN_MENU_WIDTH_RATIO);
+		menuHeight = static_cast<int>(height * MAIN_MENU_HEIGHT_RATIO);
+	}
 
-	// Start Game button
-	const char* soundText = "Ambient Sound";
-	surface = TTF_RenderText_Solid(pFont, soundText, textColor);
-	texture = SDL_CreateTextureFromSurface(pRenderer, surface);
-	int textWidth = surface->w;
-	int textHeight = surface->h;
-	SDL_FreeSurface(surface);
-	startGameRect = { (width - textWidth) / 2, (height - textHeight) / 2 - 50, textWidth, textHeight };
-	SDL_RenderCopy(pRenderer, texture, NULL, &startGameRect);
-	SDL_DestroyTexture(texture);
+	// Calculate menu position
+	int menuX = (width - menuWidth) / 2;
+	int menuY = (height - menuHeight) / 2;
 
-	// Options button
-	const char* musicText = "Music";
-	surface = TTF_RenderText_Solid(pFont, musicText, textColor);
-	texture = SDL_CreateTextureFromSurface(pRenderer, surface);
-	textWidth = surface->w;
-	textHeight = surface->h;
-	SDL_FreeSurface(surface);
-	optionsRect = { (width - textWidth) / 2, (height - textHeight) / 2, textWidth, textHeight };
-	SDL_RenderCopy(pRenderer, texture, NULL, &optionsRect);
-	SDL_DestroyTexture(texture);
+	// Render the menu background
+	SDL_SetRenderDrawColor(pRenderer, 192, 192, 192, 255);
+	SDL_Rect menuRect = { menuX, menuY, menuWidth, menuHeight };
+	SDL_RenderFillRect(pRenderer, &menuRect);
 
-	// Exit button
-	const char* returnText = "Go back";
-	surface = TTF_RenderText_Solid(pFont, returnText, textColor);
-	texture = SDL_CreateTextureFromSurface(pRenderer, surface);
-	textWidth = surface->w;
-	textHeight = surface->h;
-	SDL_FreeSurface(surface);
-	exitRect = { (width - textWidth) / 2, (height - textHeight) / 2 + 50, textWidth, textHeight };
-	SDL_RenderCopy(pRenderer, texture, NULL, &exitRect);
-	SDL_DestroyTexture(texture);
+	// Render each option
+	int optionCount = 3;
+	int optionHeight = menuHeight / optionCount;
+	int optionY = menuY;
+
+	// Option 1: General Sound
+	RenderMenuOption("Ambient Sound", menuX, optionY, menuWidth, optionHeight, textColor);
+	optionY += optionHeight;
+
+	// Option 2: Options
+	RenderMenuOption("Music", menuX, optionY, menuWidth, optionHeight, textColor);
+	optionY += optionHeight;
+
+	// Option 3: Return to the previous menu
+	RenderMenuOption("Go back", menuX, optionY, menuWidth, optionHeight, textColor);
 }
 
 void Game::RenderInGameMenu() {
 	SDL_Color textColor = { 0, 0, 0, 255 };
 
-	SDL_Surface* surface = NULL;
-	SDL_Texture* texture = NULL;
+	// Calculate menu dimensions
+	int menuWidth = static_cast<int>(width * IN_GAME_MENU_WIDTH_RATIO);
+	int menuHeight = static_cast<int>(height * IN_GAME_MENU_HEIGHT_RATIO);
 
-	// Start Game button
+	// Calculate menu position
+	int menuX = (width - menuWidth) / 2;
+	int menuY = (height - menuHeight) / 2;
+
+	// Render the menu background
+	SDL_SetRenderDrawColor(pRenderer, 192, 192, 192, 255);
+	SDL_Rect menuRect = { menuX, menuY, menuWidth, menuHeight };
+	SDL_RenderFillRect(pRenderer, &menuRect);
+
+	// Render each option
+	int optionCount = 3;
+	int optionHeight = menuHeight / optionCount;
+	int optionY = menuY;
+
+	// Option 1: Start Game
 	const char* startGameText = "Resume Game";
-	surface = TTF_RenderText_Solid(pFont, startGameText, textColor);
-	texture = SDL_CreateTextureFromSurface(pRenderer, surface);
+	RenderMenuOption(startGameText, menuX, optionY, menuWidth, optionHeight, textColor);
+	optionY += optionHeight;
+
+	// Option 2: Options
+	const char* optionsText = "Options";
+	RenderMenuOption(optionsText, menuX, optionY, menuWidth, optionHeight, textColor);
+	optionY += optionHeight;
+
+	// Option 3: Exit
+	const char* mainMenuText = "Back to Main Menu";
+	RenderMenuOption(mainMenuText, menuX, optionY, menuWidth, optionHeight, textColor);
+}
+
+void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int height, SDL_Color textColor) {
+	SDL_Surface* surface = TTF_RenderText_Solid(pFont, optionText, textColor);
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(pRenderer, surface);
 	int textWidth = surface->w;
 	int textHeight = surface->h;
 	SDL_FreeSurface(surface);
-	startGameRect = { (width - textWidth) / 2, (height - textHeight) / 2 - 50, textWidth, textHeight };
-	SDL_RenderCopy(pRenderer, texture, NULL, &startGameRect);
+
+	// Render the option text
+	SDL_Rect textRect = { x + (width - textWidth) / 2, y + (height - textHeight) / 2, textWidth, textHeight };
+	SDL_RenderCopy(pRenderer, texture, NULL, &textRect);
 	SDL_DestroyTexture(texture);
 
-	// Options button
-	const char* optionsText = "Options";
-	surface = TTF_RenderText_Solid(pFont, optionsText, textColor);
-	texture = SDL_CreateTextureFromSurface(pRenderer, surface);
-	textWidth = surface->w;
-	textHeight = surface->h;
-	SDL_FreeSurface(surface);
-	optionsRect = { (width - textWidth) / 2, (height - textHeight) / 2, textWidth, textHeight };
-	SDL_RenderCopy(pRenderer, texture, NULL, &optionsRect);
-	SDL_DestroyTexture(texture);
-
-	// Exit button
-	const char* mainMenuText = "Back to Main Menu";
-	surface = TTF_RenderText_Solid(pFont, mainMenuText, textColor);
-	texture = SDL_CreateTextureFromSurface(pRenderer, surface);
-	textWidth = surface->w;
-	textHeight = surface->h;
-	SDL_FreeSurface(surface);
-	exitRect = { (width - textWidth) / 2, (height - textHeight) / 2 + 50, textWidth, textHeight };
-	SDL_RenderCopy(pRenderer, texture, NULL, &exitRect);
-	SDL_DestroyTexture(texture);
+	// Render the option rectangle boundaries
+	SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
+	SDL_Rect rect = { x, y, width, height };
+	SDL_RenderDrawRect(pRenderer, &rect);
 }
 
 void Game::RenderScene() {
