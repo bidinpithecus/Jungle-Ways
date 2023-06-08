@@ -1,5 +1,4 @@
-#ifndef _GAME_HPP_
-#define _GAME_HPP_
+#pragma once
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -16,6 +15,7 @@ enum class GAME_STATE {
 class Game {
 public:
 	Game(int width, int height);
+
 	int OnExecute();
 	bool OnInit();
 	void OnEvent(SDL_Event* event);
@@ -47,5 +47,3 @@ private:
     SDL_Rect optionsRect;
     SDL_Rect exitRect;
 };
-
-#endif
