@@ -1,5 +1,4 @@
 #include "../include/Game.hpp"
-#include <SDL2/SDL_video.h>
 
 // Default constructor
 Game::Game(int width, int height) {
@@ -134,6 +133,18 @@ void Game::OnEvent(SDL_Event* event) {
 		if (event->type == SDL_KEYDOWN) {
 			if (event->key.keysym.sym == SDLK_ESCAPE) {
 				gameState = GAME_STATE::IN_GAME_MENU;
+			}
+			if (event->key.keysym.sym == SDLK_w) {
+				character.velocity.y = -2;
+			}
+			if (event->key.keysym.sym == SDLK_s) {
+				character.velocity.y = 2;
+			}
+			if (event->key.keysym.sym == SDLK_a) {
+				character.velocity.x = -2;
+			}
+			if (event->key.keysym.sym == SDLK_d) {
+				character.velocity.x = 2;
 			}
 		}
 	}
@@ -302,7 +313,7 @@ void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int
 
 void Game::RenderScene() {
 	glClear(GL_COLOR_BUFFER_BIT);
-	// world.step(1.0 / 60.0);
+	world.step(1.0 / 60.0);
 
 	// sky color
 	glClearColor(135 / 255.0, 206 / 255.0, 235 / 255.0, 1.0f);
@@ -319,14 +330,6 @@ void Game::RenderScene() {
 
 	glColor3f(0, 0, 0);
 	character.draw();
-
-	// for (auto& body : world.bodies) {
-	// 	body->draw();
-	// }
-
-	// for (auto& joint : world.joints) {
-	// 	joint->draw();
-	// }
 
 	glPointSize(4.0f);
 	glColor3f(1.0f, 0.0f, 0.0f);
