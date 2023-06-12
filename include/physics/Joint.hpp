@@ -22,6 +22,7 @@ struct Joint {
 	void preStep(float invDt);
 	void applyImpulse();
 	void set(Body* body1, Body* body2, const Vec2& anchor);
+	void draw();
 };
 
 }

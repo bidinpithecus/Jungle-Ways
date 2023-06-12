@@ -4,8 +4,11 @@
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include "Utils.hpp"
+#include "physics/Body.hpp"
 #include "physics/World.hpp"
+
 #include <GL/gl.h>
+#include <GL/glu.h>
 
 enum class GAME_STATE {
 	IN_GAME_MENU,
@@ -56,4 +59,6 @@ private:
 
 	physics::Body initialBranch;
 	physics::Body finalBranch;
+
+	physics::Body character;
 };

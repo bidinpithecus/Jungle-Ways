@@ -18,6 +18,10 @@ Body::Body() {
 	invI = 0.0;
 }
 
+void Body::addForce(const Vec2 &f) {
+	force += f;
+}
+
 void Body::set(const Vec2& w, float m) {
 	position.set(0.0f, 0.0f);
 	velocity.set(0.0f, 0.0f);
@@ -42,14 +46,21 @@ void Body::set(const Vec2& w, float m) {
 }
 
 void Body::draw() {
-	glPushMatrix();
-		glBegin(GL_POLYGON);
-			glVertex2f(position.x - width.x, position.y + width.y);
-			glVertex2f(position.x + width.x, position.y + width.y);
-			glVertex2f(position.x + width.x, position.y - width.y);
-			glVertex2f(position.x - width.x, position.y - width.y);
-		glEnd();
-	glPopMatrix();
+	Mat22 R(rotation);
+	Vec2 x = position;
+	Vec2 h = 0.5f * width;
+
+	Vec2 v1 = x + R * Vec2(-h.x, -h.y);
+	Vec2 v2 = x + R * Vec2( h.x, -h.y);
+	Vec2 v3 = x + R * Vec2( h.x,  h.y);
+	Vec2 v4 = x + R * Vec2(-h.x,  h.y);
+
+	glBegin(GL_POLYGON);
+		glVertex2f(v1.x, v1.y);
+		glVertex2f(v2.x, v2.y);
+		glVertex2f(v3.x, v3.y);
+		glVertex2f(v4.x, v4.y);
+	glEnd();
 }
 
 }

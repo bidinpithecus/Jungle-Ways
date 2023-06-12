@@ -1,4 +1,5 @@
 #include "../include/Game.hpp"
+#include <SDL2/SDL_video.h>
 
 // Default constructor
 Game::Game(int width, int height) {
@@ -14,20 +15,33 @@ Game::Game(int width, int height) {
 	pFont = NULL;
 
 	world.gravity = physics::Vec2(0, -9.81);
-	world.iterations = 10;
-	world.bodies.reserve(100);
-	world.joints.reserve(100);
+	world.iterations = 1;
+	world.bodies.reserve(20);
+	world.joints.reserve(20);
 
-	initialTree.width.set(width / 25.0, height / 2.0);
-	initialTree.position.set(width / 15.0, height / 2.0);
+	initialTree.width.set(width / 12.5, height);
+	initialTree.position.set(width / 12.5, height / 2.0);
 	finalTree.width = initialTree.width;
 	finalTree.position.set(width - initialTree.position.x, height / 2.0);
 
 	// TODO: Add some randomness to the positions and widths
-	initialBranch.width.set(initialTree.width.x * 1.25, initialTree.width.y / 20.0);
-	initialBranch.position.set(initialTree.position.x + initialTree.width.x + initialBranch.width.x, initialTree.position.y * 1.5);
+	initialBranch.width.set(initialTree.width.x * 2, initialTree.width.y / 20.0);
+	initialBranch.position.set(initialTree.position.x + initialTree.width.x / 2.0 + initialBranch.width.x / 2.0, initialTree.position.y * 1.5);
 	finalBranch.width = initialBranch.width;
 	finalBranch.position.set(width - initialBranch.position.x, initialTree.position.y * 0.5);
+
+	world.add(&initialTree);
+	world.add(&initialBranch);
+	world.add(&finalTree);
+	world.add(&finalBranch);
+
+	// Character initial position
+	character.width.x = (initialTree.width.y / 20.0) * 1.5;
+	character.width.y = 3 * character.width.x;
+	character.position.set(initialBranch.position.x, initialBranch.position.y - initialBranch.width.y / 2.0 - character.width.y / 2.0);
+	character.mass = 10;
+
+	world.add(&character);
 }
 
 bool Game::OnInit() {
@@ -41,9 +55,13 @@ bool Game::OnInit() {
 
 	if (TTF_Init() < 0) return false;
 
+	glContext = SDL_GL_CreateContext(pWindow);
+	if (!glContext) return false;
+
 	pFont = TTF_OpenFont("../assets/fonts/tarzan-regular.ttf", 50);
 	if (!pFont) return false;
 
+	glEnable(GL_COLOR_MATERIAL);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, width, height, 0, -1, 1);
@@ -122,12 +140,13 @@ void Game::OnEvent(SDL_Event* event) {
 }
 
 void Game::OnLoop() {
-	// Game logic here
 }
 
 void Game::OnRender() {
 	SDL_SetRenderDrawColor(pRenderer, 255, 255, 255, 255);
 	SDL_RenderClear(pRenderer);
+
+	SDL_GL_MakeCurrent(pWindow, glContext);
 
 	if (gameState == GAME_STATE::IN_GAME_MENU) {
 		RenderInGameMenu();
@@ -145,6 +164,7 @@ void Game::OnRender() {
 void Game::OnExit() {
 	SDL_DestroyRenderer(pRenderer);
 	SDL_DestroyWindow(pWindow);
+	SDL_GL_DeleteContext(glContext);
 	pWindow = NULL;
 	SDL_Quit();
 
@@ -282,21 +302,44 @@ void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int
 
 void Game::RenderScene() {
 	glClear(GL_COLOR_BUFFER_BIT);
+	// world.step(1.0 / 60.0);
 
 	// sky color
 	glClearColor(135 / 255.0, 206 / 255.0, 235 / 255.0, 1.0f);
 
 	// left tree
 	glColor3f(92 / 255.0, 64 / 255.0, 51 / 255.0);
-	glPushMatrix();
-		initialTree.draw();
-		initialBranch.draw();
-	glPopMatrix();
+	initialTree.draw();
+	initialBranch.draw();
 
 	// right tree
 	glColor3f(92 / 255.0, 64 / 255.0, 51 / 255.0);
-	glPushMatrix();
-		finalTree.draw();
-		finalBranch.draw();
-	glPopMatrix();
+	finalTree.draw();
+	finalBranch.draw();
+
+	glColor3f(0, 0, 0);
+	character.draw();
+
+	// for (auto& body : world.bodies) {
+	// 	body->draw();
+	// }
+
+	// for (auto& joint : world.joints) {
+	// 	joint->draw();
+	// }
+
+	glPointSize(4.0f);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glBegin(GL_POINTS);
+		std::map<physics::ArbiterKey, physics::Arbiter>::const_iterator iter;
+		for (iter = world.arbiters.begin(); iter != world.arbiters.end(); ++iter) {
+			const physics::Arbiter& arbiter = iter->second;
+			for (int i = 0; i < arbiter.numContacts; ++i) {
+				physics::Vec2 p = arbiter.contacts[i].position;
+				glVertex2f(p.x, p.y);
+			}
+		}
+	glEnd();
+	glPointSize(1.0f);
+
 }

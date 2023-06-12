@@ -22,4 +22,5 @@ struct Body {
 	void addForce(const Vec2& f);
 	void draw();
 };
+
 }

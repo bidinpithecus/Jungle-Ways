@@ -98,4 +98,25 @@ void Joint::applyImpulse() {
 	p += impulse;
 }
 
+void Joint::draw() {
+	Body* b1 = body1;
+	Body* b2 = body2;
+
+	Mat22 R1(b1->rotation);
+	Mat22 R2(b2->rotation);
+
+	Vec2 x1 = b1->position;
+	Vec2 p1 = x1 + R1 * localAnchor1;
+
+	Vec2 x2 = b2->position;
+	Vec2 p2 = x2 + R2 * localAnchor2;
+
+	glBegin(GL_LINES);
+		glVertex2f(x1.x, x1.y);
+		glVertex2f(p1.x, p1.y);
+		glVertex2f(x2.x, x2.y);
+		glVertex2f(p2.x, p2.y);
+	glEnd();
+}
+
 }
