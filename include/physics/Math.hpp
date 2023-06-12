@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <cfloat>
 #include <cassert>
 
 namespace physics {
@@ -9,7 +10,7 @@ struct Vec2 {
 	Vec2() {}
 	Vec2(float x, float y) : x(x), y(y) {}
 
-	void Set(float x_, float y_) { x = x_; y = y_; }
+	void set(float x, float y) { this->x = x; this->y = y; }
 
 	Vec2 operator-() { return Vec2(-x, -y); }
 
@@ -25,7 +26,7 @@ struct Vec2 {
 		x *= a; y *= a;
 	}
 
-	float Length() const {
+	float length() const {
 		return sqrtf(x * x + y * y);
 	}
 };
@@ -41,11 +42,11 @@ struct Mat22 {
 
 	Mat22(const Vec2& col1, const Vec2& col2) : col1(col1), col2(col2) {}
 
-	Mat22 Transpose() const {
+	Mat22 transpose() const {
 		return Mat22(Vec2(col1.x, col2.x), Vec2(col1.y, col2.y));
 	}
 
-	Mat22 Invert() const {
+	Mat22 invert() const {
 		float a = col1.x, b = col2.x, c = col1.y, d = col2.y;
 		Mat22 B;
 		float det = a * d - b * c;
@@ -74,7 +75,11 @@ float sign(float x);
 float min(float a, float b);
 float max(float a, float b);
 float clamp(float a, float low, float high);
-template<typename T> void swap(T& a, T& b);
 float random();
 float random(float lo, float hi);
+template<typename T> inline void swap(T& a, T& b) {
+	T tmp = a;
+	a = b;
+	b = tmp;
+}
 }

@@ -12,6 +12,22 @@ Game::Game(int width, int height) {
 	pRenderer = NULL;
 	glContext = NULL;
 	pFont = NULL;
+
+	world.gravity = physics::Vec2(0, -9.81);
+	world.iterations = 10;
+	world.bodies.reserve(100);
+	world.joints.reserve(100);
+
+	initialTree.width.set(width / 25.0, height / 2.0);
+	initialTree.position.set(width / 15.0, height / 2.0);
+	finalTree.width = initialTree.width;
+	finalTree.position.set(width - initialTree.position.x, height / 2.0);
+
+	// TODO: Add some randomness to the positions and widths
+	initialBranch.width.set(initialTree.width.x * 1.25, initialTree.width.y / 20.0);
+	initialBranch.position.set(initialTree.position.x + initialTree.width.x + initialBranch.width.x, initialTree.position.y * 1.5);
+	finalBranch.width = initialBranch.width;
+	finalBranch.position.set(width - initialBranch.position.x, initialTree.position.y * 0.5);
 }
 
 bool Game::OnInit() {
@@ -27,6 +43,12 @@ bool Game::OnInit() {
 
 	pFont = TTF_OpenFont("../assets/fonts/tarzan-regular.ttf", 50);
 	if (!pFont) return false;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, width, height, 0, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 	return true;
 }
@@ -117,7 +139,7 @@ void Game::OnRender() {
 		RenderScene();
 	}
 
-	SDL_RenderPresent(pRenderer);
+	SDL_GL_SwapWindow(pWindow);
 }
 
 void Game::OnExit() {
@@ -125,9 +147,16 @@ void Game::OnExit() {
 	SDL_DestroyWindow(pWindow);
 	pWindow = NULL;
 	SDL_Quit();
+
+	world.clear();
 }
 
 void Game::RenderMainMenu() {
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// sky color
+	glClearColor(1.0, 1.0, 1.0, 1.0);
+
 	SDL_Color textColor = { 0, 0, 0, 255 };
 
 	// Calculate menu dimensions
@@ -252,5 +281,22 @@ void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int
 }
 
 void Game::RenderScene() {
-	// Render scene
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// sky color
+	glClearColor(135 / 255.0, 206 / 255.0, 235 / 255.0, 1.0f);
+
+	// left tree
+	glColor3f(92 / 255.0, 64 / 255.0, 51 / 255.0);
+	glPushMatrix();
+		initialTree.draw();
+		initialBranch.draw();
+	glPopMatrix();
+
+	// right tree
+	glColor3f(92 / 255.0, 64 / 255.0, 51 / 255.0);
+	glPushMatrix();
+		finalTree.draw();
+		finalBranch.draw();
+	glPopMatrix();
 }

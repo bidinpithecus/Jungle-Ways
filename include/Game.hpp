@@ -4,6 +4,8 @@
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include "Utils.hpp"
+#include "physics/World.hpp"
+#include <GL/gl.h>
 
 enum class GAME_STATE {
 	IN_GAME_MENU,
@@ -46,4 +48,12 @@ private:
 	SDL_Rect startGameRect;
     SDL_Rect optionsRect;
     SDL_Rect exitRect;
+
+	physics::World world;
+
+	physics::Body initialTree;
+	physics::Body finalTree;
+
+	physics::Body initialBranch;
+	physics::Body finalBranch;
 };

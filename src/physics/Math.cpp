@@ -2,7 +2,7 @@
 
 namespace physics {
 
-float Dot(const Vec2& a, const Vec2& b) {
+float dot(const Vec2& a, const Vec2& b) {
 	return a.x * b.x + a.y * b.y;
 }
 
@@ -68,12 +68,6 @@ float max(float a, float b) {
 
 float clamp(float a, float low, float high) {
 	return max(low, min(a, high));
-}
-
-template<typename T> void swap(T& a, T& b) {
-	T tmp = a;
-	a = b;
-	b = tmp;
 }
 
 // Random number in range [-1,1]
