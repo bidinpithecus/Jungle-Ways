@@ -1,4 +1,5 @@
 #include "../include/Game.hpp"
+#include <SDL2/SDL_keycode.h>
 
 // Default constructor
 Game::Game(int width, int height) {
@@ -14,9 +15,9 @@ Game::Game(int width, int height) {
 	pFont = NULL;
 
 	world.gravity = physics::Vec2(0, 9.81);
-	world.iterations = 8;
+	world.iterations = 2;
 	world.bodies.reserve(20);
-	world.joints.reserve(20);
+	world.joints.reserve(1);
 }
 
 void Game::ResetGame() {
@@ -44,6 +45,12 @@ void Game::ResetGame() {
 	character.set(character.width, character.mass);
 	character.position.set(initialBranch.position.x, initialBranch.position.y - initialBranch.width.y / 2.0 - character.width.y / 2.0);
 	world.add(&character);
+
+	anotherBranch = initialBranch;
+	anotherBranch.position.x += width / 3.5;
+	anotherBranch.position.y -= height / 4.0;
+	anotherBranch.rotation = 0.5;
+	world.add(&anotherBranch);
 }
 
 bool Game::OnInit() {
@@ -146,11 +153,8 @@ void Game::OnEvent(SDL_Event* event) {
 			}
 		}
 		if (event->type == SDL_KEYUP) {
-			if (event->key.keysym.sym == SDLK_a) {
-				character.velocity.x = 0;
-			}
-			if (event->key.keysym.sym == SDLK_d) {
-				character.velocity.x = 0;
+			if (event->key.keysym.sym == SDLK_SPACE) {
+				character.velocity.y = -40;
 			}
 		}
 	}
@@ -317,9 +321,31 @@ void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int
 	SDL_RenderDrawRect(pRenderer, &rect);
 }
 
+void Game::Logic() {
+	world.step(tick);
+
+	// World boundaries
+	// left-right
+	if (character.position.x <= -character.width.x / 2.0f) {
+		std::cout << "Out of bounds (left)" << std::endl;
+		ResetGame();
+	} else if (character.position.x >= width + (character.width.x / 2.0f)) {
+		std::cout << "Out of bounds (right)" << std::endl;
+		ResetGame();
+	}
+	// top-bottom
+	if (character.position.y <= -character.width.y / 2.0f) {
+		std::cout << "Out of bounds (top)" << std::endl;
+		ResetGame();
+	} else if (character.position.y >= height + (character.width.y / 2.0f)) {
+		std::cout << "Out of bounds (bottom)" << std::endl;
+		ResetGame();
+	}
+}
+
 void Game::RenderScene() {
+	Logic();
 	glClear(GL_COLOR_BUFFER_BIT);
-	world.step(1.0f / 60.0f);
 
 	// sky color
 	glClearColor(135 / 255.0, 206 / 255.0, 235 / 255.0, 1.0f);
@@ -330,10 +356,11 @@ void Game::RenderScene() {
 	initialBranch.draw();
 
 	// right tree
-	glColor3f(92 / 255.0, 64 / 255.0, 51 / 255.0);
 	finalTree.draw();
 	finalBranch.draw();
 
+	// another branch just for testing
+	anotherBranch.draw();
 	glColor3f(0, 0, 0);
 	character.draw();
 }

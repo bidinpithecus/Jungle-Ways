@@ -33,6 +33,7 @@ public:
 	void RenderInGameMenu();
 	void RenderScene();
 	void ResetGame();
+	void Logic();
 
 private:
 	int width;
@@ -41,6 +42,7 @@ private:
     const float IN_GAME_MENU_HEIGHT_RATIO = 0.80f;
     const float MAIN_MENU_WIDTH_RATIO = 0.90f;
     const float MAIN_MENU_HEIGHT_RATIO = 0.90f;
+	const float tick = 1 / 60.0f;
 	bool isRunning;
 	GAME_STATE gameState;
 	GAME_STATE previousState;
@@ -57,9 +59,8 @@ private:
 
 	physics::Body initialTree;
 	physics::Body finalTree;
-
 	physics::Body initialBranch;
 	physics::Body finalBranch;
-
+	physics::Body anotherBranch;
 	physics::Body character;
 };
