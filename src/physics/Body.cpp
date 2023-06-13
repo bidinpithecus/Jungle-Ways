@@ -32,6 +32,10 @@ void Body::set(const Vec2& w, float m) {
 	angularVelocity = 0.0f;
 	torque = 0.0f;
 	friction = 0.2f;
+	setMass(m);
+}
+
+void Body::setMass(float m) {
 	mass = m;
 
 	if (mass < FLT_MAX)	{

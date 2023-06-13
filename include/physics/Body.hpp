@@ -21,6 +21,7 @@ struct Body {
 	void set(const Vec2& w, float m);
 	void addForce(const Vec2& f);
 	void draw();
+	void setMass(float m);
 };
 
 }

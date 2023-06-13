@@ -32,6 +32,7 @@ public:
 	void RenderOptionsMenu();
 	void RenderInGameMenu();
 	void RenderScene();
+	void ResetGame();
 
 private:
 	int width;

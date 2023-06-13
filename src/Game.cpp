@@ -13,33 +13,36 @@ Game::Game(int width, int height) {
 	glContext = NULL;
 	pFont = NULL;
 
-	world.gravity = physics::Vec2(0, -9.81);
-	world.iterations = 1;
+	world.gravity = physics::Vec2(0, 9.81);
+	world.iterations = 8;
 	world.bodies.reserve(20);
 	world.joints.reserve(20);
+}
+
+void Game::ResetGame() {
+	world.clear();
 
 	initialTree.width.set(width / 12.5, height);
 	initialTree.position.set(width / 12.5, height / 2.0);
 	finalTree.width = initialTree.width;
 	finalTree.position.set(width - initialTree.position.x, height / 2.0);
+	world.add(&initialTree);
+	world.add(&finalTree);
 
 	// TODO: Add some randomness to the positions and widths
 	initialBranch.width.set(initialTree.width.x * 2, initialTree.width.y / 20.0);
 	initialBranch.position.set(initialTree.position.x + initialTree.width.x / 2.0 + initialBranch.width.x / 2.0, initialTree.position.y * 1.5);
 	finalBranch.width = initialBranch.width;
 	finalBranch.position.set(width - initialBranch.position.x, initialTree.position.y * 0.5);
-
-	world.add(&initialTree);
 	world.add(&initialBranch);
-	world.add(&finalTree);
 	world.add(&finalBranch);
 
 	// Character initial position
 	character.width.x = (initialTree.width.y / 20.0) * 1.5;
 	character.width.y = 3 * character.width.x;
+	character.setMass(1);
+	character.set(character.width, character.mass);
 	character.position.set(initialBranch.position.x, initialBranch.position.y - initialBranch.width.y / 2.0 - character.width.y / 2.0);
-	character.mass = 10;
-
 	world.add(&character);
 }
 
@@ -107,6 +110,7 @@ void Game::OnEvent(SDL_Event* event) {
 		previousState = GAME_STATE::MAIN_MENU;
 		if (event->type == SDL_KEYDOWN) {
 			if (event->key.keysym.sym == SDLK_1) {
+				ResetGame();
 				gameState = GAME_STATE::PLAYING;
 			} else if (event->key.keysym.sym == SDLK_2) {
 				gameState = GAME_STATE::OPTIONS_SUB_MENU;
@@ -134,17 +138,19 @@ void Game::OnEvent(SDL_Event* event) {
 			if (event->key.keysym.sym == SDLK_ESCAPE) {
 				gameState = GAME_STATE::IN_GAME_MENU;
 			}
-			if (event->key.keysym.sym == SDLK_w) {
-				character.velocity.y = -2;
-			}
-			if (event->key.keysym.sym == SDLK_s) {
-				character.velocity.y = 2;
-			}
 			if (event->key.keysym.sym == SDLK_a) {
-				character.velocity.x = -2;
+				character.velocity.x = -4;
 			}
 			if (event->key.keysym.sym == SDLK_d) {
-				character.velocity.x = 2;
+				character.velocity.x = 4;
+			}
+		}
+		if (event->type == SDL_KEYUP) {
+			if (event->key.keysym.sym == SDLK_a) {
+				character.velocity.x = 0;
+			}
+			if (event->key.keysym.sym == SDLK_d) {
+				character.velocity.x = 0;
 			}
 		}
 	}
@@ -313,7 +319,7 @@ void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int
 
 void Game::RenderScene() {
 	glClear(GL_COLOR_BUFFER_BIT);
-	world.step(1.0 / 60.0);
+	world.step(1.0f / 60.0f);
 
 	// sky color
 	glClearColor(135 / 255.0, 206 / 255.0, 235 / 255.0, 1.0f);
@@ -330,19 +336,4 @@ void Game::RenderScene() {
 
 	glColor3f(0, 0, 0);
 	character.draw();
-
-	glPointSize(4.0f);
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glBegin(GL_POINTS);
-		std::map<physics::ArbiterKey, physics::Arbiter>::const_iterator iter;
-		for (iter = world.arbiters.begin(); iter != world.arbiters.end(); ++iter) {
-			const physics::Arbiter& arbiter = iter->second;
-			for (int i = 0; i < arbiter.numContacts; ++i) {
-				physics::Vec2 p = arbiter.contacts[i].position;
-				glVertex2f(p.x, p.y);
-			}
-		}
-	glEnd();
-	glPointSize(1.0f);
-
 }
