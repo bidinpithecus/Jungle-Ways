@@ -1,5 +1,5 @@
 #include "../include/Game.hpp"
-#include <SDL2/SDL_keycode.h>
+#include "../include/utils/FPSLimiter.hpp"
 
 // Default constructor
 Game::Game(int width, int height) {
@@ -84,13 +84,16 @@ int Game::OnExecute() {
 	SDL_Event event;
 	if (!OnInit()) return -1;
 
+	FPSLimiter fps(360);
 	while(isRunning) {
 		while(SDL_PollEvent(&event)) {
 			OnEvent(&event);
 		}
 
 		OnLoop();
+		Logic();
 		OnRender();
+		fps.run();
 	}
 
 	OnExit();
@@ -344,7 +347,6 @@ void Game::Logic() {
 }
 
 void Game::RenderScene() {
-	Logic();
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// sky color
