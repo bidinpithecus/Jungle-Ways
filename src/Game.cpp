@@ -16,7 +16,7 @@ Game::Game(int width, int height) {
 
 	world.gravity = physics::Vec2(0, 9.81);
 	world.iterations = 2;
-	world.bodies.reserve(20);
+	world.bodies.reserve(13);
 	world.joints.reserve(1);
 }
 
@@ -38,13 +38,23 @@ void Game::ResetGame() {
 	world.add(&initialBranch);
 	world.add(&finalBranch);
 
-	// Character initial position
-	character.width.x = (initialTree.width.y / 20.0) * 1.5;
-	character.width.y = 3 * character.width.x;
-	character.setMass(1);
-	character.set(character.width, character.mass);
-	character.position.set(initialBranch.position.x, initialBranch.position.y - initialBranch.width.y / 2.0 - character.width.y / 2.0);
-	world.add(&character);
+	// CharacterTorso initial position
+	characterTorso.width.x = (initialTree.width.y / 20.0) * 1.5;
+	characterTorso.width.y = 3 * characterTorso.width.x;
+	characterTorso.setMass(1);
+	characterTorso.set(characterTorso.width, characterTorso.mass);
+	characterTorso.position.set(initialBranch.position.x, initialBranch.position.y - initialBranch.width.y / 2.0 - characterTorso.width.y / 2.0);
+	world.add(&characterTorso);
+
+	characterHead.width.set(characterTorso.width.x * 0.75f, characterTorso.width.x * 0.75f);
+	characterHead.setMass(characterTorso.mass);
+	characterHead.set(characterHead.width, characterHead.mass);
+	characterHead.position.set(characterTorso.position.x, (characterTorso.position.y - characterTorso.width.y / 2.0) - characterHead.width.y / 2.0);
+	world.add(&characterHead);
+
+	physics::Joint neck{&characterTorso, &characterHead, physics::Vec2(0.0f, 1.0f)};
+
+	world.add(&neck);
 
 	anotherBranch = initialBranch;
 	anotherBranch.position.x += width / 3.5;
@@ -84,14 +94,13 @@ int Game::OnExecute() {
 	SDL_Event event;
 	if (!OnInit()) return -1;
 
-	FPSLimiter fps(360);
+	FPSLimiter fps(420);
 	while(isRunning) {
 		while(SDL_PollEvent(&event)) {
 			OnEvent(&event);
 		}
 
 		OnLoop();
-		Logic();
 		OnRender();
 		fps.run();
 	}
@@ -149,15 +158,15 @@ void Game::OnEvent(SDL_Event* event) {
 				gameState = GAME_STATE::IN_GAME_MENU;
 			}
 			if (event->key.keysym.sym == SDLK_a) {
-				character.velocity.x = -4;
+				characterTorso.velocity.x = -8;
 			}
 			if (event->key.keysym.sym == SDLK_d) {
-				character.velocity.x = 4;
+				characterTorso.velocity.x = 8;
 			}
 		}
-		if (event->type == SDL_KEYUP) {
+		if (event->type == SDL_KEYDOWN) {
 			if (event->key.keysym.sym == SDLK_SPACE) {
-				character.velocity.y = -40;
+				characterTorso.velocity.y = -40;
 			}
 		}
 	}
@@ -329,24 +338,25 @@ void Game::Logic() {
 
 	// World boundaries
 	// left-right
-	if (character.position.x <= -character.width.x / 2.0f) {
+	if (characterTorso.position.x <= -characterTorso.width.x) {
 		std::cout << "Out of bounds (left)" << std::endl;
 		ResetGame();
-	} else if (character.position.x >= width + (character.width.x / 2.0f)) {
+	} else if (characterTorso.position.x >= width + characterTorso.width.x) {
 		std::cout << "Out of bounds (right)" << std::endl;
 		ResetGame();
 	}
 	// top-bottom
-	if (character.position.y <= -character.width.y / 2.0f) {
+	if (characterTorso.position.y <= -characterTorso.width.y) {
 		std::cout << "Out of bounds (top)" << std::endl;
 		ResetGame();
-	} else if (character.position.y >= height + (character.width.y / 2.0f)) {
+	} else if (characterTorso.position.y >= height + characterTorso.width.y) {
 		std::cout << "Out of bounds (bottom)" << std::endl;
 		ResetGame();
 	}
 }
 
 void Game::RenderScene() {
+	Logic();
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// sky color
@@ -364,5 +374,6 @@ void Game::RenderScene() {
 	// another branch just for testing
 	anotherBranch.draw();
 	glColor3f(0, 0, 0);
-	character.draw();
+	characterTorso.draw();
+	characterHead.draw();
 }

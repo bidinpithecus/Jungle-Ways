@@ -28,6 +28,24 @@ void Joint::set(Body* b1, Body* b2, const Vec2& anchor) {
 	biasFactor = 0.2f;
 }
 
+Joint::Joint(Body* b1, Body* b2, const Vec2& anchor) {
+	body1 = b1;
+	body2 = b2;
+
+	Mat22 Rot1(body1->rotation);
+	Mat22 Rot2(body2->rotation);
+	Mat22 Rot1T = Rot1.transpose();
+	Mat22 Rot2T = Rot2.transpose();
+
+	localAnchor1 = Rot1T * (anchor - body1->position);
+	localAnchor2 = Rot2T * (anchor - body2->position);
+
+	p.set(0.0f, 0.0f);
+
+	softness = 0.0f;
+	biasFactor = 0.2f;
+}
+
 void Joint::preStep(float invDt) {
 	// Pre-compute anchors, mass matrix, and bias.
 	Mat22 Rot1(body1->rotation);

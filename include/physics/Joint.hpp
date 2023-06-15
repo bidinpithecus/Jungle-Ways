@@ -18,6 +18,7 @@ struct Joint {
 	float softness;
 
 	Joint();
+	Joint(Body* body1, Body* body2, const Vec2& anchor);
 
 	void preStep(float invDt);
 	void applyImpulse();
