@@ -15,41 +15,49 @@ Game::Game(int width, int height) {
 	pFont = NULL;
 
 	world.gravity = physics::Vec2(0, 9.81);
-	world.iterations = 2;
-	world.bodies.reserve(13);
+	world.iterations = 10;
+	world.bodies.reserve(8);
 	world.joints.reserve(1);
+
+	initialTree = new physics::Body();
+	finalTree = new physics::Body();
+	initialBranch = new physics::Body();
+	finalBranch = new physics::Body();
+	anotherBranch = new physics::Body();
+	characterTorso = new physics::Body();
 }
 
 void Game::ResetGame() {
 	world.clear();
 
-	initialTree.width.set(width / 12.5, height);
-	initialTree.position.set(width / 12.5, height / 2.0);
-	finalTree.width = initialTree.width;
-	finalTree.position.set(width - initialTree.position.x, height / 2.0);
-	world.add(&initialTree);
-	world.add(&finalTree);
+	initialTree->width.set(width / 12.5, height);
+	initialTree->position.set(width / 12.5, height / 2.0);
+	finalTree->width.set(width / 12.5, height);
+	finalTree->position.set(width - initialTree->position.x, height / 2.0);
+	world.add(initialTree);
+	world.add(finalTree);
 
-	// TODO: Add some randomness to the positions and widths
-	initialBranch.width.set(initialTree.width.x * 2, initialTree.width.y / 20.0);
-	initialBranch.position.set(initialTree.position.x + initialTree.width.x / 2.0 + initialBranch.width.x / 2.0, initialTree.position.y * 1.5);
-	finalBranch.width = initialBranch.width;
-	finalBranch.position.set(width - initialBranch.position.x, initialTree.position.y * 0.5);
-	world.add(&initialBranch);
-	world.add(&finalBranch);
+	// TODO: Add some randomness to positions and widths
+	initialBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
+	initialBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0 + initialBranch->width.x / 2.0, initialTree->position.y * 1.5);
+	finalBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
+	finalBranch->position.set(width - initialBranch->position.x, initialTree->position.y * 0.5);
+	world.add(initialBranch);
+	world.add(finalBranch);
 
 	// CharacterTorso initial position
-	characterTorso.width.x = (initialTree.width.y / 20.0) * 1.5;
-	characterTorso.width.y = 3 * characterTorso.width.x;
-	characterTorso.set(characterTorso.width, 1);
-	characterTorso.position.set(initialBranch.position.x, initialBranch.position.y - initialBranch.width.y / 2.0 - characterTorso.width.y / 2.0);
-	world.add(&characterTorso);
+	characterTorso->width.x = (initialTree->width.y / 20.0) * 1.5;
+	characterTorso->width.y = 3 * characterTorso->width.x;
+	characterTorso->set(characterTorso->width, 0.01);
+	characterTorso->position.set(initialBranch->position.x, initialBranch->position.y - initialBranch->width.y / 2.0 - characterTorso->width.y / 2.0);
+	world.add(characterTorso);
 
-	anotherBranch = initialBranch;
-	anotherBranch.position.x += width / 3.5;
-	anotherBranch.position.y -= height / 4.0;
-	anotherBranch.rotation = 0.5;
-	world.add(&anotherBranch);
+	anotherBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
+	anotherBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0 + initialBranch->width.x / 2.0, initialTree->position.y * 1.5);
+	anotherBranch->position.x += width / 3.5;
+	anotherBranch->position.y -= height / 4.0;
+	anotherBranch->rotation = 0.5;
+	world.add(anotherBranch);
 }
 
 bool Game::OnInit() {
@@ -147,15 +155,13 @@ void Game::OnEvent(SDL_Event* event) {
 				gameState = GAME_STATE::IN_GAME_MENU;
 			}
 			if (event->key.keysym.sym == SDLK_a) {
-				characterTorso.velocity.x = -8;
+				world.bodies[4]->addForce(physics::Vec2(-4, 0));
 			}
 			if (event->key.keysym.sym == SDLK_d) {
-				characterTorso.velocity.x = 8;
+				world.bodies[4]->addForce(physics::Vec2(4, 0));
 			}
-		}
-		if (event->type == SDL_KEYDOWN) {
 			if (event->key.keysym.sym == SDLK_SPACE) {
-				characterTorso.velocity.y = -40;
+				world.bodies[4]->addForce(physics::Vec2(0, -20));
 			}
 		}
 	}
@@ -189,6 +195,13 @@ void Game::OnExit() {
 	SDL_GL_DeleteContext(glContext);
 	pWindow = NULL;
 	SDL_Quit();
+
+	delete initialTree;
+	delete finalTree;
+	delete initialBranch;
+	delete finalBranch;
+	delete anotherBranch;
+	delete characterTorso;
 
 	world.clear();
 }
@@ -327,18 +340,18 @@ void Game::Logic() {
 
 	// World boundaries
 	// left-right
-	if (characterTorso.position.x <= -characterTorso.width.x) {
+	if (characterTorso->position.x <= -characterTorso->width.x) {
 		std::cout << "Out of bounds (left)" << std::endl;
 		ResetGame();
-	} else if (characterTorso.position.x >= width + characterTorso.width.x) {
+	} else if (characterTorso->position.x >= width + characterTorso->width.x) {
 		std::cout << "Out of bounds (right)" << std::endl;
 		ResetGame();
 	}
 	// top-bottom
-	if (characterTorso.position.y <= -characterTorso.width.y) {
+	if (characterTorso->position.y <= -characterTorso->width.y) {
 		std::cout << "Out of bounds (top)" << std::endl;
 		ResetGame();
-	} else if (characterTorso.position.y >= height + characterTorso.width.y) {
+	} else if (characterTorso->position.y >= height + characterTorso->width.y) {
 		std::cout << "Out of bounds (bottom)" << std::endl;
 		ResetGame();
 	}
@@ -350,18 +363,10 @@ void Game::RenderScene() {
 
 	// sky color
 	glClearColor(135 / 255.0, 206 / 255.0, 235 / 255.0, 1.0f);
-
-	// left tree
-	glColor3f(92 / 255.0, 64 / 255.0, 51 / 255.0);
-	initialTree.draw();
-	initialBranch.draw();
-
-	// right tree
-	finalTree.draw();
-	finalBranch.draw();
-
-	// another branch just for testing
-	anotherBranch.draw();
 	glColor3f(0, 0, 0);
-	characterTorso.draw();
+	for (int i = 0; i < (int) world.bodies.size(); i++) {
+		world.bodies[i]->draw();
+		// std::cout << "body " << i << ": " << world.bodies[i]->inTouch << std::endl;
+	}
+	std::cout << std::endl;
 }

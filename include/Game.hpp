@@ -57,10 +57,10 @@ private:
 
 	physics::World world;
 
-	physics::Body initialTree;
-	physics::Body finalTree;
-	physics::Body initialBranch;
-	physics::Body finalBranch;
-	physics::Body anotherBranch;
-	physics::Body characterTorso;
+	physics::Body* initialTree;
+	physics::Body* finalTree;
+	physics::Body* initialBranch;
+	physics::Body* finalBranch;
+	physics::Body* anotherBranch;
+	physics::Body* characterTorso;
 };
