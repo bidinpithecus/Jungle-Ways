@@ -63,9 +63,4 @@ private:
 	physics::Body finalBranch;
 	physics::Body anotherBranch;
 	physics::Body characterTorso;
-	physics::Body characterLeftLeg;
-	physics::Body characterRightLeg;
-	physics::Body characterLeftArm;
-	physics::Body characterRightArm;
-	physics::Body characterHead;
 };

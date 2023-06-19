@@ -41,20 +41,9 @@ void Game::ResetGame() {
 	// CharacterTorso initial position
 	characterTorso.width.x = (initialTree.width.y / 20.0) * 1.5;
 	characterTorso.width.y = 3 * characterTorso.width.x;
-	characterTorso.setMass(1);
-	characterTorso.set(characterTorso.width, characterTorso.mass);
+	characterTorso.set(characterTorso.width, 1);
 	characterTorso.position.set(initialBranch.position.x, initialBranch.position.y - initialBranch.width.y / 2.0 - characterTorso.width.y / 2.0);
 	world.add(&characterTorso);
-
-	characterHead.width.set(characterTorso.width.x * 0.75f, characterTorso.width.x * 0.75f);
-	characterHead.setMass(characterTorso.mass);
-	characterHead.set(characterHead.width, characterHead.mass);
-	characterHead.position.set(characterTorso.position.x, (characterTorso.position.y - characterTorso.width.y / 2.0) - characterHead.width.y / 2.0);
-	world.add(&characterHead);
-
-	physics::Joint neck{&characterTorso, &characterHead, physics::Vec2(0.0f, 1.0f)};
-
-	world.add(&neck);
 
 	anotherBranch = initialBranch;
 	anotherBranch.position.x += width / 3.5;
@@ -375,5 +364,4 @@ void Game::RenderScene() {
 	anotherBranch.draw();
 	glColor3f(0, 0, 0);
 	characterTorso.draw();
-	characterHead.draw();
 }
