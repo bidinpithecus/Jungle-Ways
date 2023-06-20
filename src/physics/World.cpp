@@ -10,7 +10,7 @@ typedef pair<ArbiterKey, Arbiter> ArbPair;
 typedef map<ArbiterKey, Arbiter>::iterator ArbIter;
 
 bool World::accumulateImpulses = true;
-bool World::warmStarting = true;
+bool World::warmStarting = false;
 bool World::positionCorrection = true;
 
 World::World() {}
@@ -72,7 +72,7 @@ void World::step(float dt) {
 		}
 
 		body->velocity += dt * (gravity + body->invMass * body->force);
-		body->angularVelocity += dt * body->invI * body->torque;
+		// body->angularVelocity += dt * body->invI * body->torque;
 	}
 
 	for (auto& arb : arbiters) {
@@ -97,7 +97,7 @@ void World::step(float dt) {
 
 	for (auto& body : bodies) {
 		body->position += dt * body->velocity;
-		body->rotation += dt * body->angularVelocity;
+		// body->rotation += dt * body->angularVelocity;
 
 		body->force.set(0.0f, 0.0f);
 		body->torque = 0.0f;

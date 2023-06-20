@@ -10,6 +10,7 @@ struct Body {
 	Vec2 velocity;
 	Vec2 force;
 	Vec2 width;
+	Vec2 terminalVelocity;
 	float rotation;
 	float angularVelocity;
 	float torque;

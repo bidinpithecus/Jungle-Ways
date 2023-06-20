@@ -7,6 +7,7 @@ Body::Body() {
 	velocity.set(0.0f, 0.0f);
 	force.set(0.0f, 0.0f);
 	width.set(1.0f, 1.0f);
+	terminalVelocity.set(0.0f, 0.0f);
 
 	rotation = 0.0f;
 	angularVelocity = 0.0f;
@@ -20,13 +21,20 @@ Body::Body() {
 }
 
 void Body::addForce(const Vec2 &f) {
-	force += f;
+	if (fabs(terminalVelocity.x) < fabs(velocity.x)) {
+		force.x += f.x;
+	}
+	if (fabs(terminalVelocity.y) < fabs(velocity.y)) {
+		force.y += f.y;
+	}
+	// force += f;
 }
 
 void Body::set(const Vec2& w, float m) {
 	position.set(0.0f, 0.0f);
 	velocity.set(0.0f, 0.0f);
 	force.set(0.0f, 0.0f);
+	terminalVelocity.set(0.0f, 0.0f);
 	width = w;
 
 	rotation = 0.0f;

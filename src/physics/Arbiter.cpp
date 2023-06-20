@@ -93,10 +93,10 @@ void Arbiter::preStep(float invDt) {
 			Vec2 P = c->pNormal * c->normal + c->pTangent * tangent;
 
 			body1->velocity -= body1->invMass * P;
-			body1->angularVelocity -= body1->invI * cross(r1, P);
+			// body1->angularVelocity -= body1->invI * cross(r1, P);
 
 			body2->velocity += body2->invMass * P;
-			body2->angularVelocity += body2->invI * cross(r2, P);
+			// body2->angularVelocity += body2->invI * cross(r2, P);
 		}
 	}
 }
@@ -131,10 +131,10 @@ void Arbiter::applyImpulse() {
 		Vec2 pNormal = dPn * c->normal;
 
 		b1->velocity -= b1->invMass * pNormal;
-		b1->angularVelocity -= b1->invI * cross(c->r1, pNormal);
+		// b1->angularVelocity -= b1->invI * cross(c->r1, pNormal);
 
 		b2->velocity += b2->invMass * pNormal;
-		b2->angularVelocity += b2->invI * cross(c->r2, pNormal);
+		// b2->angularVelocity += b2->invI * cross(c->r2, pNormal);
 
 		// Relative velocity at contact
 		dv = b2->velocity + cross(b2->angularVelocity, c->r2) - b1->velocity - cross(b1->angularVelocity, c->r1);
@@ -160,10 +160,10 @@ void Arbiter::applyImpulse() {
 		Vec2 pTangent = dPt * tangent;
 
 		b1->velocity -= b1->invMass * pTangent;
-		b1->angularVelocity -= b1->invI * cross(c->r1, pTangent);
+		// b1->angularVelocity -= b1->invI * cross(c->r1, pTangent);
 
 		b2->velocity += b2->invMass * pTangent;
-		b2->angularVelocity += b2->invI * cross(c->r2, pTangent);
+		// b2->angularVelocity += b2->invI * cross(c->r2, pTangent);
 	}
 }
 

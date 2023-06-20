@@ -40,7 +40,7 @@ void Game::ResetGame() {
 	// TODO: Add some randomness to positions and widths
 	initialBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
 	initialBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0 + initialBranch->width.x / 2.0, initialTree->position.y * 1.5);
-	initialBranch->friction = 0.5f;
+	initialBranch->terminalVelocity.set(10, 10);
 	finalBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
 	finalBranch->position.set(width - initialBranch->position.x, initialTree->position.y * 0.5);
 	world.add(initialBranch);
@@ -102,16 +102,13 @@ bool Game::OnInit() {
 
 void Game::handleCharacter() {
 	if (keyboardStateArray[SDL_SCANCODE_A]) {
-		world.bodies[4]->velocity.x = -20;
-		// world.bodies[4]->addForce(physics::Vec2(-4, 0));
+		world.bodies[4]->addForce(physics::Vec2(-1, 0));
 	}
 	if (keyboardStateArray[SDL_SCANCODE_D]) {
-		world.bodies[4]->velocity.x = 20;
-		// world.bodies[4]->addForce(physics::Vec2(4, 0));
+		world.bodies[4]->addForce(physics::Vec2(4, 0));
 	}
 	if (keyboardStateArray[SDL_SCANCODE_SPACE] && world.bodies[4]->canJump) {
-		// world.bodies[4]->velocity.y = -20;
-		world.bodies[4]->addForce(physics::Vec2(0, -20));
+		world.bodies[4]->addForce(physics::Vec2(0, -10));
 	}
 }
 
@@ -135,7 +132,6 @@ int Game::OnExecute() {
 }
 
 void Game::OnEvent(SDL_Event* event) {
-	bool isWalkingLeft{ false }, isWalkingRight{ false }, isJumping{ false };
 	if (event->type == SDL_QUIT) {
 		isRunning = false;
 	}
