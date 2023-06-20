@@ -46,9 +46,6 @@ void World::broadPhase() {
 			ArbiterKey key(bi, bj);
 
 			if (newArb.numContacts > 0) {
-				printf("broadPhase <==> i: %d; j: %d\n", i, j);
-				bi->inTouch = true;
-				bj->inTouch = true;
 				ArbIter iter = arbiters.find(key);
 				if (iter == arbiters.end()) {
 					arbiters.insert(ArbPair(key, newArb));
@@ -56,8 +53,8 @@ void World::broadPhase() {
 					iter->second.update(newArb.contacts, newArb.numContacts);
 				}
 			} else {
-				bi->inTouch = false;
-				bj->inTouch = false;
+				bi->canJump = false;
+				bj->canJump = false;
 				arbiters.erase(key);
 			}
 		}
@@ -78,11 +75,9 @@ void World::step(float dt) {
 		body->angularVelocity += dt * body->invI * body->torque;
 	}
 
-	for (int i = 0; i < (int) bodies.size(); i++) {
-		std::cout << "body " << i << ": " << bodies[i]->inTouch << std::endl;
-	}
-
 	for (auto& arb : arbiters) {
+		arb.second.body1->canJump = true;
+		arb.second.body2->canJump = true;
 		arb.second.preStep(invDt);
 	}
 

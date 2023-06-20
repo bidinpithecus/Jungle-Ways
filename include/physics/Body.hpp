@@ -16,7 +16,7 @@ struct Body {
 	float friction;
 	float mass, invMass;
 	float I, invI;
-	bool inTouch;
+	bool canJump;
 
 	Body();
 	void set(const Vec2& w, float m);

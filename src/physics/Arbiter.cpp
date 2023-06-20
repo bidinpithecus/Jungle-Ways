@@ -22,8 +22,6 @@ Arbiter::Arbiter(Body* b1, Body* b2) {
 
 	numContacts = collide(contacts, body1, body2);
 
-	printf("numContacts: %d\n", numContacts);
-	printf("body1: %d; body2: %d\n", body1->inTouch, body2->inTouch);
 	friction = sqrtf(body1->friction * body2->friction);
 }
 

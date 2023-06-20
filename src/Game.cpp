@@ -61,21 +61,33 @@ void Game::ResetGame() {
 }
 
 bool Game::OnInit() {
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) return false;
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+		return false;
+	}
 
 	pWindow = SDL_CreateWindow("Jungle Ways", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
-	if (!pWindow) return false;
+	if (!pWindow) {
+		return false;
+	}
 
 	pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED);
-	if (!pRenderer) return false;
+	if (!pRenderer) {
+		return false;
+	}
 
-	if (TTF_Init() < 0) return false;
+	if (TTF_Init() < 0) {
+		return false;
+	}
 
 	glContext = SDL_GL_CreateContext(pWindow);
-	if (!glContext) return false;
+	if (!glContext) {
+		return false;
+	}
 
 	pFont = TTF_OpenFont("../assets/fonts/tarzan-regular.ttf", 50);
-	if (!pFont) return false;
+	if (!pFont) {
+		return false;
+	}
 
 	glEnable(GL_COLOR_MATERIAL);
 	glMatrixMode(GL_PROJECTION);
@@ -160,7 +172,7 @@ void Game::OnEvent(SDL_Event* event) {
 			if (event->key.keysym.sym == SDLK_d) {
 				world.bodies[4]->addForce(physics::Vec2(4, 0));
 			}
-			if (event->key.keysym.sym == SDLK_SPACE) {
+			if (event->key.keysym.sym == SDLK_SPACE && world.bodies[4]->canJump) {
 				world.bodies[4]->addForce(physics::Vec2(0, -20));
 			}
 		}
@@ -209,7 +221,6 @@ void Game::OnExit() {
 void Game::RenderMainMenu() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// sky color
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	SDL_Color textColor = { 0, 0, 0, 255 };
@@ -361,12 +372,10 @@ void Game::RenderScene() {
 	Logic();
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// sky color
+	// Sky color
 	glClearColor(135 / 255.0, 206 / 255.0, 235 / 255.0, 1.0f);
 	glColor3f(0, 0, 0);
 	for (int i = 0; i < (int) world.bodies.size(); i++) {
 		world.bodies[i]->draw();
-		// std::cout << "body " << i << ": " << world.bodies[i]->inTouch << std::endl;
 	}
-	std::cout << std::endl;
 }

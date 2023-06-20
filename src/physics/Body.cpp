@@ -16,7 +16,7 @@ Body::Body() {
 	invMass = 0.f;
 	I = FLT_MAX;
 	invI = 0.0f;
-	inTouch = false;
+	canJump = false;
 }
 
 void Body::addForce(const Vec2 &f) {
@@ -34,7 +34,7 @@ void Body::set(const Vec2& w, float m) {
 	torque = 0.0f;
 	friction = 0.2f;
 	setMass(m);
-	inTouch = false;
+	canJump = false;
 }
 
 void Body::setMass(float m) {
