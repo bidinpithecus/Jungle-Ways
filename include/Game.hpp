@@ -21,6 +21,7 @@ class Game {
 public:
 	Game(int width, int height);
 
+	void handleCharacter();
 	int OnExecute();
 	bool OnInit();
 	void OnEvent(SDL_Event* event);
@@ -54,6 +55,8 @@ private:
 	SDL_Rect startGameRect;
     SDL_Rect optionsRect;
     SDL_Rect exitRect;
+
+	const Uint8* keyboardStateArray = SDL_GetKeyboardState(NULL);
 
 	physics::World world;
 

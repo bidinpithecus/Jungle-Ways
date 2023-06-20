@@ -40,6 +40,7 @@ void Game::ResetGame() {
 	// TODO: Add some randomness to positions and widths
 	initialBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
 	initialBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0 + initialBranch->width.x / 2.0, initialTree->position.y * 1.5);
+	initialBranch->friction = 0.5f;
 	finalBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
 	finalBranch->position.set(width - initialBranch->position.x, initialTree->position.y * 0.5);
 	world.add(initialBranch);
@@ -99,16 +100,31 @@ bool Game::OnInit() {
 	return true;
 }
 
+void Game::handleCharacter() {
+	if (keyboardStateArray[SDL_SCANCODE_A]) {
+		world.bodies[4]->velocity.x = -20;
+		// world.bodies[4]->addForce(physics::Vec2(-4, 0));
+	}
+	if (keyboardStateArray[SDL_SCANCODE_D]) {
+		world.bodies[4]->velocity.x = 20;
+		// world.bodies[4]->addForce(physics::Vec2(4, 0));
+	}
+	if (keyboardStateArray[SDL_SCANCODE_SPACE] && world.bodies[4]->canJump) {
+		// world.bodies[4]->velocity.y = -20;
+		world.bodies[4]->addForce(physics::Vec2(0, -20));
+	}
+}
+
 int Game::OnExecute() {
 	SDL_Event event;
 	if (!OnInit()) return -1;
 
 	FPSLimiter fps(420);
 	while(isRunning) {
-		while(SDL_PollEvent(&event)) {
+		while((SDL_PollEvent(&event)) != 0) {
 			OnEvent(&event);
 		}
-
+		handleCharacter();
 		OnLoop();
 		OnRender();
 		fps.run();
@@ -119,6 +135,7 @@ int Game::OnExecute() {
 }
 
 void Game::OnEvent(SDL_Event* event) {
+	bool isWalkingLeft{ false }, isWalkingRight{ false }, isJumping{ false };
 	if (event->type == SDL_QUIT) {
 		isRunning = false;
 	}
@@ -162,18 +179,9 @@ void Game::OnEvent(SDL_Event* event) {
 		}
 	} else if (gameState == GAME_STATE::PLAYING) {
 		previousState = GAME_STATE::PLAYING;
-		if (event->type == SDL_KEYDOWN) {
+		if (event->type == SDL_KEYDOWN || event->type == SDL_KEYUP) {
 			if (event->key.keysym.sym == SDLK_ESCAPE) {
 				gameState = GAME_STATE::IN_GAME_MENU;
-			}
-			if (event->key.keysym.sym == SDLK_a) {
-				world.bodies[4]->addForce(physics::Vec2(-4, 0));
-			}
-			if (event->key.keysym.sym == SDLK_d) {
-				world.bodies[4]->addForce(physics::Vec2(4, 0));
-			}
-			if (event->key.keysym.sym == SDLK_SPACE && world.bodies[4]->canJump) {
-				world.bodies[4]->addForce(physics::Vec2(0, -20));
 			}
 		}
 	}
@@ -205,8 +213,11 @@ void Game::OnExit() {
 	SDL_DestroyRenderer(pRenderer);
 	SDL_DestroyWindow(pWindow);
 	SDL_GL_DeleteContext(glContext);
+	TTF_CloseFont(pFont);
+	pRenderer = NULL;
 	pWindow = NULL;
-	SDL_Quit();
+	glContext = NULL;
+	pFont = NULL;
 
 	delete initialTree;
 	delete finalTree;
@@ -216,6 +227,8 @@ void Game::OnExit() {
 	delete characterTorso;
 
 	world.clear();
+	TTF_Quit();
+	SDL_Quit();
 }
 
 void Game::RenderMainMenu() {
