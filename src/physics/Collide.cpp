@@ -2,6 +2,8 @@
 
 namespace physics {
 
+typedef std::pair<int, std::vector<Vec2>> ContactResult;
+
 void flip(FeaturePair& fp) {
 	swap(fp.e.inEdge1, fp.e.inEdge2);
 	swap(fp.e.outEdge1, fp.e.outEdge2);
@@ -94,6 +96,8 @@ void computeIncidentEdge(ClipVertex c[2], const Vec2& h, const Vec2& pos, const 
 
 // The normal points from A to B
 int collide(Contact* contacts, Body* bodyA, Body* bodyB) {
+	std::vector<Vec2> contactPoints;
+	contactPoints.reserve(2);
 	// setup
 	Vec2 hA = 0.5f * bodyA->width;
 	Vec2 hB = 0.5f * bodyB->width;

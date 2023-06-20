@@ -21,13 +21,7 @@ Body::Body() {
 }
 
 void Body::addForce(const Vec2 &f) {
-	if (fabs(terminalVelocity.x) < fabs(velocity.x)) {
-		force.x += f.x;
-	}
-	if (fabs(terminalVelocity.y) < fabs(velocity.y)) {
-		force.y += f.y;
-	}
-	// force += f;
+	force += f;
 }
 
 void Body::set(const Vec2& w, float m) {

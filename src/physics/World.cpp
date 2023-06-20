@@ -72,12 +72,18 @@ void World::step(float dt) {
 		}
 
 		body->velocity += dt * (gravity + body->invMass * body->force);
-		// body->angularVelocity += dt * body->invI * body->torque;
 	}
 
 	for (auto& arb : arbiters) {
-		arb.second.body1->canJump = true;
-		arb.second.body2->canJump = true;
+		if (arb.second.contacts[0].position.x != arb.second.contacts[1].position.x) {
+			if (arb.second.contacts[0].position.y * 1.001 >= arb.second.body1->position.y + arb.second.body1->width.y / 2.0f) {
+				arb.second.body1->canJump = true;
+			}
+			if (arb.second.contacts[0].position.y * 1.001 >= arb.second.body2->position.y + arb.second.body2->width.y / 2.0f) {
+				arb.second.body2->canJump = true;
+			}
+		}
+
 		arb.second.preStep(invDt);
 	}
 

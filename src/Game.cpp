@@ -32,8 +32,10 @@ void Game::ResetGame() {
 
 	initialTree->width.set(width / 12.5, height);
 	initialTree->position.set(width / 12.5, height / 2.0);
+	initialTree->friction = 0;
 	finalTree->width.set(width / 12.5, height);
 	finalTree->position.set(width - initialTree->position.x, height / 2.0);
+	finalTree->friction = 0;
 	world.add(initialTree);
 	world.add(finalTree);
 
@@ -46,19 +48,21 @@ void Game::ResetGame() {
 	world.add(initialBranch);
 	world.add(finalBranch);
 
-	// CharacterTorso initial position
-	characterTorso->width.x = (initialTree->width.y / 20.0) * 1.5;
-	characterTorso->width.y = 3 * characterTorso->width.x;
-	characterTorso->set(characterTorso->width, 0.01);
-	characterTorso->position.set(initialBranch->position.x, initialBranch->position.y - initialBranch->width.y / 2.0 - characterTorso->width.y / 2.0);
-	world.add(characterTorso);
-
 	anotherBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
 	anotherBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0 + initialBranch->width.x / 2.0, initialTree->position.y * 1.5);
 	anotherBranch->position.x += width / 3.5;
 	anotherBranch->position.y -= height / 4.0;
 	anotherBranch->rotation = 0.5;
 	world.add(anotherBranch);
+
+	// CharacterTorso initial position
+	characterTorso->width.x = (initialTree->width.y / 20.0) * 1.5;
+	characterTorso->width.y = 3 * characterTorso->width.x;
+	characterTorso->set(characterTorso->width, 0.01);
+	characterTorso->terminalVelocity.set(20, 20);
+	characterTorso->friction = 2.0f;
+	characterTorso->position.set(initialBranch->position.x, initialBranch->position.y - initialBranch->width.y / 2.0 - characterTorso->width.y / 2.0);
+	world.add(characterTorso);
 }
 
 bool Game::OnInit() {
@@ -102,13 +106,13 @@ bool Game::OnInit() {
 
 void Game::handleCharacter() {
 	if (keyboardStateArray[SDL_SCANCODE_A]) {
-		world.bodies[4]->addForce(physics::Vec2(-1, 0));
+		world.bodies[5]->velocity.x = -10.0f;
 	}
 	if (keyboardStateArray[SDL_SCANCODE_D]) {
-		world.bodies[4]->addForce(physics::Vec2(4, 0));
+		world.bodies[5]->velocity.x = 10.0f;
 	}
-	if (keyboardStateArray[SDL_SCANCODE_SPACE] && world.bodies[4]->canJump) {
-		world.bodies[4]->addForce(physics::Vec2(0, -10));
+	if (keyboardStateArray[SDL_SCANCODE_SPACE] && world.bodies[5]->canJump) {
+		world.bodies[5]->velocity.y = -40.0f;
 	}
 }
 
@@ -162,9 +166,9 @@ void Game::OnEvent(SDL_Event* event) {
 	} else if (gameState == GAME_STATE::OPTIONS_SUB_MENU) {
 		if (event->type == SDL_KEYDOWN) {
 			if (event->key.keysym.sym == SDLK_1) {
-				std::cout << "Sub-option 1 chosen" << std::endl;
+				// Nothing yet
 			} else if (event->key.keysym.sym == SDLK_2) {
-				std::cout << "Sub-option 2 chosen" << std::endl;
+				// Nothing yet
 			} else if (event->key.keysym.sym == SDLK_3) {
 				if (previousState == GAME_STATE::MAIN_MENU) {
 					gameState = GAME_STATE::MAIN_MENU;
@@ -178,6 +182,9 @@ void Game::OnEvent(SDL_Event* event) {
 		if (event->type == SDL_KEYDOWN || event->type == SDL_KEYUP) {
 			if (event->key.keysym.sym == SDLK_ESCAPE) {
 				gameState = GAME_STATE::IN_GAME_MENU;
+			}
+			if (event->key.keysym.sym == SDLK_r) {
+				ResetGame();
 			}
 		}
 	}
@@ -361,18 +368,14 @@ void Game::Logic() {
 	// World boundaries
 	// left-right
 	if (characterTorso->position.x <= -characterTorso->width.x) {
-		std::cout << "Out of bounds (left)" << std::endl;
 		ResetGame();
 	} else if (characterTorso->position.x >= width + characterTorso->width.x) {
-		std::cout << "Out of bounds (right)" << std::endl;
 		ResetGame();
 	}
 	// top-bottom
 	if (characterTorso->position.y <= -characterTorso->width.y) {
-		std::cout << "Out of bounds (top)" << std::endl;
 		ResetGame();
 	} else if (characterTorso->position.y >= height + characterTorso->width.y) {
-		std::cout << "Out of bounds (bottom)" << std::endl;
 		ResetGame();
 	}
 }

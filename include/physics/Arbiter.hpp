@@ -55,7 +55,7 @@ struct Arbiter {
 	void applyImpulse();
 };
 
-int collide(Contact* contacts, Body* body1, Body* body2);
+extern int collide(Contact* contacts, Body* body1, Body* body2);
 bool operator<(const ArbiterKey& a1, const ArbiterKey& a2);
 
 }
