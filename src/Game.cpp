@@ -25,6 +25,8 @@ Game::Game(int width, int height) {
 	finalBranch = new physics::Body();
 	anotherBranch = new physics::Body();
 	characterTorso = new physics::Body();
+
+	charId = 0;
 }
 
 void Game::ResetGame() {
@@ -49,10 +51,9 @@ void Game::ResetGame() {
 	world.add(finalBranch);
 
 	anotherBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
-	anotherBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0 + initialBranch->width.x / 2.0, initialTree->position.y * 1.5);
+	anotherBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0 + initialBranch->width.x / 2.0, initialBranch->position.y * 1.5);
 	anotherBranch->position.x += width / 3.5;
 	anotherBranch->position.y -= height / 4.0;
-	anotherBranch->rotation = 0.5;
 	world.add(anotherBranch);
 
 	// CharacterTorso initial position
@@ -63,6 +64,8 @@ void Game::ResetGame() {
 	characterTorso->friction = 2.0f;
 	characterTorso->position.set(initialBranch->position.x, initialBranch->position.y - initialBranch->width.y / 2.0 - characterTorso->width.y / 2.0);
 	world.add(characterTorso);
+
+	charId = characterTorso->id;
 }
 
 bool Game::OnInit() {
@@ -106,13 +109,13 @@ bool Game::OnInit() {
 
 void Game::handleCharacter() {
 	if (keyboardStateArray[SDL_SCANCODE_A]) {
-		world.bodies[5]->velocity.x = -10.0f;
+		world.bodies[charId]->velocity.x = -15.0f;
 	}
 	if (keyboardStateArray[SDL_SCANCODE_D]) {
-		world.bodies[5]->velocity.x = 10.0f;
+		world.bodies[charId]->velocity.x = 15.0f;
 	}
-	if (keyboardStateArray[SDL_SCANCODE_SPACE] && world.bodies[5]->canJump) {
-		world.bodies[5]->velocity.y = -40.0f;
+	if (keyboardStateArray[SDL_SCANCODE_SPACE] && world.bodies[charId]->canJump) {
+		world.bodies[charId]->velocity.y = -40.0f;
 	}
 }
 
@@ -365,17 +368,23 @@ void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int
 void Game::Logic() {
 	world.step(tick);
 
+	if (world.bodies[anotherBranch->id]->position.y > height) {
+		world.bodies[anotherBranch->id]->position.y -= 0.2f;
+	} else {
+		world.bodies[anotherBranch->id]->position.y += 0.2f;
+	}
+
 	// World boundaries
 	// left-right
-	if (characterTorso->position.x <= -characterTorso->width.x) {
+	if (world.bodies[charId]->position.x <= -world.bodies[charId]->width.x) {
 		ResetGame();
-	} else if (characterTorso->position.x >= width + characterTorso->width.x) {
+	} else if (world.bodies[charId]->position.x >= width + world.bodies[charId]->width.x) {
 		ResetGame();
 	}
 	// top-bottom
-	if (characterTorso->position.y <= -characterTorso->width.y) {
+	if (world.bodies[charId]->position.y <= -world.bodies[charId]->width.y) {
 		ResetGame();
-	} else if (characterTorso->position.y >= height + characterTorso->width.y) {
+	} else if (world.bodies[charId]->position.y >= height + world.bodies[charId]->width.y) {
 		ResetGame();
 	}
 }

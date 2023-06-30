@@ -1,5 +1,4 @@
 #include "../../include/physics/World.hpp"
-#include <cstdio>
 
 namespace physics {
 
@@ -16,6 +15,7 @@ bool World::positionCorrection = true;
 World::World() {}
 
 void World::add(Body* body) {
+	body->id = bodies.size();
 	bodies.emplace_back(body);
 }
 
@@ -103,7 +103,7 @@ void World::step(float dt) {
 
 	for (auto& body : bodies) {
 		body->position += dt * body->velocity;
-		// body->rotation += dt * body->angularVelocity;
+		body->rotation += dt * body->angularVelocity;
 
 		body->force.set(0.0f, 0.0f);
 		body->torque = 0.0f;

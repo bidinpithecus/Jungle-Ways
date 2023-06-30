@@ -6,6 +6,8 @@
 namespace physics {
 
 struct Body {
+	int id;
+
 	Vec2 position;
 	Vec2 velocity;
 	Vec2 force;

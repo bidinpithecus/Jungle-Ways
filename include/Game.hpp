@@ -66,4 +66,6 @@ private:
 	physics::Body* finalBranch;
 	physics::Body* anotherBranch;
 	physics::Body* characterTorso;
+
+	int charId;
 };
