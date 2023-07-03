@@ -1,12 +1,16 @@
 #pragma once
 
 #include <GL/gl.h>
+#include <FreeImage.h>
 #include "Math.hpp"
+#include <iostream>
+#include <filesystem>
 
 namespace physics {
 
 struct Body {
 	int id;
+	int textureId;
 
 	Vec2 position;
 	Vec2 velocity;
@@ -26,6 +30,7 @@ struct Body {
 	void addForce(const Vec2& f);
 	void draw();
 	void setMass(float m);
+	void applyTexture(const char* fileName);
 };
 
 }

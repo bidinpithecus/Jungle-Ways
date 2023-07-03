@@ -78,9 +78,11 @@ void World::step(float dt) {
 		if (arb.second.contacts[0].position.x != arb.second.contacts[1].position.x) {
 			if (arb.second.contacts[0].position.y * 1.001 >= arb.second.body1->position.y + arb.second.body1->width.y / 2.0f) {
 				arb.second.body1->canJump = true;
+				arb.second.body1->friction = 2.0f;
 			}
 			if (arb.second.contacts[0].position.y * 1.001 >= arb.second.body2->position.y + arb.second.body2->width.y / 2.0f) {
 				arb.second.body2->canJump = true;
+				arb.second.body2->friction = 2.0f;
 			}
 		}
 

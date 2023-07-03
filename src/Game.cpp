@@ -9,12 +9,12 @@ Game::Game(int width, int height) {
 	isRunning = true;
 	gameState = GAME_STATE::MAIN_MENU;
 	previousState = gameState;
-	pWindow = NULL;
-	pRenderer = NULL;
+	pWindow = nullptr;
+	pRenderer = nullptr;
 	glContext = NULL;
-	pFont = NULL;
+	pFont = nullptr;
 
-	world.gravity = physics::Vec2(0, 9.81);
+	world.gravity = physics::Vec2(0, 9.81f);
 	world.iterations = 10;
 	world.bodies.reserve(8);
 	world.joints.reserve(1);
@@ -24,48 +24,55 @@ Game::Game(int width, int height) {
 	initialBranch = new physics::Body();
 	finalBranch = new physics::Body();
 	anotherBranch = new physics::Body();
-	characterTorso = new physics::Body();
-
-	charId = 0;
+	character = new physics::Body();
 }
 
-void Game::ResetGame() {
-	world.clear();
+void Game::LevelDesign(bool isRandom) {
+	initialBranch->set(physics::Vec2(initialTree->width.x * 2, initialTree->width.y / 20.0f), FLT_MAX);
+	initialBranch->textureId = static_cast<int>(TEXTURE::branch);
+	finalBranch->set(physics::Vec2(initialBranch->width.x, initialBranch->width.y), FLT_MAX);
+	finalBranch->textureId = static_cast<int>(TEXTURE::branch);
+	character->width.x = (initialTree->width.y / 20.0f) * 1.5f;
+	character->width.y = 2.5f * character->width.x;
+	character->set(character->width, 0.01f);
+	character->textureId = static_cast<int>(TEXTURE::character);
 
-	initialTree->width.set(width / 12.5, height);
-	initialTree->position.set(width / 12.5, height / 2.0);
-	initialTree->friction = 0;
-	finalTree->width.set(width / 12.5, height);
-	finalTree->position.set(width - initialTree->position.x, height / 2.0);
-	finalTree->friction = 0;
-	world.add(initialTree);
-	world.add(finalTree);
+	if (isRandom) {
+		initialBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0f + initialBranch->width.x / 2.0f, randomFloat(initialTree->position.y * 0.15f + character->width.y / 2.0f + initialBranch->width.y / 2.0f, initialTree->position.y * 1.875f));
+		finalBranch->position.set(width - initialBranch->position.x, randomFloat(initialTree->position.y * 0.15f + character->width.y / 2.0f + finalBranch->width.y / 2.0f, initialTree->position.y * 1.875f));
+	}
 
-	// TODO: Add some randomness to positions and widths
-	initialBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
-	initialBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0 + initialBranch->width.x / 2.0, initialTree->position.y * 1.5);
-	initialBranch->terminalVelocity.set(10, 10);
-	finalBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
-	finalBranch->position.set(width - initialBranch->position.x, initialTree->position.y * 0.5);
 	world.add(initialBranch);
 	world.add(finalBranch);
 
-	anotherBranch->width.set(initialTree->width.x * 2, initialTree->width.y / 20.0);
-	anotherBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0 + initialBranch->width.x / 2.0, initialBranch->position.y * 1.5);
-	anotherBranch->position.x += width / 3.5;
-	anotherBranch->position.y -= height / 4.0;
+	anotherBranch->set(physics::Vec2(initialTree->width.x * 2, initialTree->width.y / 20.0f), FLT_MAX);
+	anotherBranch->textureId = static_cast<int>(TEXTURE::branch);
+	anotherBranch->position.set(width / 2.0f, height / 2.0f);
+	anotherBranch->velocity.y = 20.0f;
 	world.add(anotherBranch);
 
-	// CharacterTorso initial position
-	characterTorso->width.x = (initialTree->width.y / 20.0) * 1.5;
-	characterTorso->width.y = 3 * characterTorso->width.x;
-	characterTorso->set(characterTorso->width, 0.01);
-	characterTorso->terminalVelocity.set(20, 20);
-	characterTorso->friction = 2.0f;
-	characterTorso->position.set(initialBranch->position.x, initialBranch->position.y - initialBranch->width.y / 2.0 - characterTorso->width.y / 2.0);
-	world.add(characterTorso);
+	// Character initial position
+	character->friction = 2.0f;
+	character->position.set(initialBranch->position.x, initialBranch->position.y - initialBranch->width.y / 2.0f - character->width.y / 2.0f);
+	world.add(character);
+}
 
-	charId = characterTorso->id;
+void Game::ResetGame(bool isRandom) {
+	world.clear();
+
+	initialTree->set(physics::Vec2(width / 12.5f, height), FLT_MAX);
+	initialTree->textureId = static_cast<int>(TEXTURE::tree);
+	initialTree->position.set(width / 12.5f, height / 2.0f);
+	initialTree->friction = 0;
+	world.add(initialTree);
+
+	finalTree->set(physics::Vec2(width / 12.5f, height), FLT_MAX);
+	finalTree->textureId = static_cast<int>(TEXTURE::tree);
+	finalTree->position.set(width - initialTree->position.x, height / 2.0f);
+	finalTree->friction = 0;
+	world.add(finalTree);
+
+	LevelDesign(isRandom);
 }
 
 bool Game::OnInit() {
@@ -109,13 +116,13 @@ bool Game::OnInit() {
 
 void Game::handleCharacter() {
 	if (keyboardStateArray[SDL_SCANCODE_A]) {
-		world.bodies[charId]->velocity.x = -15.0f;
+		world.bodies[character->id]->velocity.x = -20.0f;
 	}
 	if (keyboardStateArray[SDL_SCANCODE_D]) {
-		world.bodies[charId]->velocity.x = 15.0f;
+		world.bodies[character->id]->velocity.x = 20.0f;
 	}
-	if (keyboardStateArray[SDL_SCANCODE_SPACE] && world.bodies[charId]->canJump) {
-		world.bodies[charId]->velocity.y = -40.0f;
+	if (keyboardStateArray[SDL_SCANCODE_SPACE] && world.bodies[character->id]->canJump) {
+		world.bodies[character->id]->velocity.y = -40.0f;
 	}
 }
 
@@ -158,7 +165,7 @@ void Game::OnEvent(SDL_Event* event) {
 		previousState = GAME_STATE::MAIN_MENU;
 		if (event->type == SDL_KEYDOWN) {
 			if (event->key.keysym.sym == SDLK_1) {
-				ResetGame();
+				ResetGame(true);
 				gameState = GAME_STATE::PLAYING;
 			} else if (event->key.keysym.sym == SDLK_2) {
 				gameState = GAME_STATE::OPTIONS_SUB_MENU;
@@ -187,7 +194,7 @@ void Game::OnEvent(SDL_Event* event) {
 				gameState = GAME_STATE::IN_GAME_MENU;
 			}
 			if (event->key.keysym.sym == SDLK_r) {
-				ResetGame();
+				ResetGame(false);
 			}
 		}
 	}
@@ -220,18 +227,17 @@ void Game::OnExit() {
 	SDL_DestroyWindow(pWindow);
 	SDL_GL_DeleteContext(glContext);
 	TTF_CloseFont(pFont);
-	pRenderer = NULL;
-	pWindow = NULL;
+	pRenderer = nullptr;
+	pWindow = nullptr;
 	glContext = NULL;
-	pFont = NULL;
+	pFont = nullptr;
 
 	delete initialTree;
 	delete finalTree;
 	delete initialBranch;
 	delete finalBranch;
 	delete anotherBranch;
-	delete characterTorso;
-
+	delete character;
 	world.clear();
 	TTF_Quit();
 	SDL_Quit();
@@ -240,9 +246,9 @@ void Game::OnExit() {
 void Game::RenderMainMenu() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	SDL_Color textColor = { 0, 0, 0, 255 };
+	SDL_Color textColor = {0, 0, 0, 255};
 
 	// Calculate menu dimensions
 	int menuWidth = static_cast<int>(width * MAIN_MENU_WIDTH_RATIO);
@@ -275,7 +281,7 @@ void Game::RenderMainMenu() {
 }
 
 void Game::RenderOptionsMenu() {
-	SDL_Color textColor = { 0, 0, 0, 255 };
+	SDL_Color textColor{0, 0, 0, 255};
 	int menuWidth = width;
 	int menuHeight = height;
 
@@ -289,12 +295,12 @@ void Game::RenderOptionsMenu() {
 	}
 
 	// Calculate menu position
-	int menuX = (width - menuWidth) / 2;
-	int menuY = (height - menuHeight) / 2;
+	int menuX = static_cast<int>((width - menuWidth) / 2.0f);
+	int menuY = static_cast<int>((height - menuHeight) / 2.0f);
 
 	// Render the menu background
 	SDL_SetRenderDrawColor(pRenderer, 192, 192, 192, 255);
-	SDL_Rect menuRect = { menuX, menuY, menuWidth, menuHeight };
+	SDL_Rect menuRect{ menuX, menuY, menuWidth, menuHeight };
 	SDL_RenderFillRect(pRenderer, &menuRect);
 
 	// Render each option
@@ -315,19 +321,19 @@ void Game::RenderOptionsMenu() {
 }
 
 void Game::RenderInGameMenu() {
-	SDL_Color textColor = { 0, 0, 0, 255 };
+	SDL_Color textColor = {0, 0, 0, 255};
 
 	// Calculate menu dimensions
 	int menuWidth = static_cast<int>(width * IN_GAME_MENU_WIDTH_RATIO);
 	int menuHeight = static_cast<int>(height * IN_GAME_MENU_HEIGHT_RATIO);
 
 	// Calculate menu position
-	int menuX = (width - menuWidth) / 2;
-	int menuY = (height - menuHeight) / 2;
+	int menuX = static_cast<int>((width - menuWidth) / 2.0f);
+	int menuY = static_cast<int>((height - menuHeight) / 2.0f);
 
 	// Render the menu background
 	SDL_SetRenderDrawColor(pRenderer, 192, 192, 192, 255);
-	SDL_Rect menuRect = { menuX, menuY, menuWidth, menuHeight };
+	SDL_Rect menuRect{ menuX, menuY, menuWidth, menuHeight };
 	SDL_RenderFillRect(pRenderer, &menuRect);
 
 	// Render each option
@@ -355,37 +361,37 @@ void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int
 	SDL_FreeSurface(surface);
 
 	// Render the option text
-	SDL_Rect textRect = { x + (width - textWidth) / 2, y + (height - textHeight) / 2, textWidth, textHeight };
+	SDL_Rect textRect{ x + (width - textWidth) / 2, y + (height - textHeight) / 2, textWidth, textHeight };
 	SDL_RenderCopy(pRenderer, texture, NULL, &textRect);
 	SDL_DestroyTexture(texture);
 
 	// Render the option rectangle boundaries
 	SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
-	SDL_Rect rect = { x, y, width, height };
+	SDL_Rect rect{ x, y, width, height };
 	SDL_RenderDrawRect(pRenderer, &rect);
 }
 
 void Game::Logic() {
 	world.step(tick);
 
-	if (world.bodies[anotherBranch->id]->position.y > height) {
-		world.bodies[anotherBranch->id]->position.y -= 0.2f;
-	} else {
-		world.bodies[anotherBranch->id]->position.y += 0.2f;
+	if (world.bodies[anotherBranch->id]->position.y >= height - world.bodies[anotherBranch->id]->width.y / 2.0f) {
+		world.bodies[anotherBranch->id]->velocity.y = -world.bodies[anotherBranch->id]->velocity.y;
+	} else if (world.bodies[anotherBranch->id]->position.y <= world.bodies[anotherBranch->id]->width.y / 2.0f) {
+		world.bodies[anotherBranch->id]->velocity.y = -world.bodies[anotherBranch->id]->velocity.y;
 	}
 
 	// World boundaries
 	// left-right
-	if (world.bodies[charId]->position.x <= -world.bodies[charId]->width.x) {
-		ResetGame();
-	} else if (world.bodies[charId]->position.x >= width + world.bodies[charId]->width.x) {
-		ResetGame();
+	if (world.bodies[character->id]->position.x <= -world.bodies[character->id]->width.x) {
+		ResetGame(false);
+	} else if (world.bodies[character->id]->position.x >= width + world.bodies[character->id]->width.x) {
+		ResetGame(false);
 	}
 	// top-bottom
-	if (world.bodies[charId]->position.y <= -world.bodies[charId]->width.y) {
-		ResetGame();
-	} else if (world.bodies[charId]->position.y >= height + world.bodies[charId]->width.y) {
-		ResetGame();
+	if (world.bodies[character->id]->position.y <= -world.bodies[character->id]->width.y) {
+		ResetGame(false);
+	} else if (world.bodies[character->id]->position.y >= height + world.bodies[character->id]->width.y) {
+		ResetGame(false);
 	}
 }
 
@@ -394,9 +400,17 @@ void Game::RenderScene() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Sky color
-	glClearColor(135 / 255.0, 206 / 255.0, 235 / 255.0, 1.0f);
+	glClearColor(135 / 255.0f, 206 / 255.0f, 235 / 255.0f, 1.0f);
 	glColor3f(0, 0, 0);
 	for (int i = 0; i < (int) world.bodies.size(); i++) {
 		world.bodies[i]->draw();
+		world.bodies[character->id]->applyTexture("../assets/sprites/character.png");
+		// if (world.bodies[i]->textureId == static_cast<int>(TEXTURE::branch)) {
+		// 	world.bodies[i]->applyTexture("../assets/sprites/branch.png");
+		// } else if (world.bodies[i]->textureId == static_cast<int>(TEXTURE::character)) {
+		// 	// world.bodies[i]->applyTexture("../assets/sprites/character.png");
+		// } else if (world.bodies[i]->textureId == static_cast<int>(TEXTURE::tree)) {
+		// 	// world.bodies[i]->applyTexture("../assets/sprites/tree.png");
+		// }
 	}
 }

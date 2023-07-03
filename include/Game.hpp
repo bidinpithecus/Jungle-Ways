@@ -2,13 +2,20 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-#include <iostream>
 #include "Utils.hpp"
 #include "physics/Body.hpp"
 #include "physics/World.hpp"
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <random>
+#include <ctime>
+
+enum struct TEXTURE {
+	branch = 0,
+	character = 1,
+	tree = 2
+};
 
 enum class GAME_STATE {
 	IN_GAME_MENU,
@@ -22,19 +29,20 @@ public:
 	Game(int width, int height);
 
 	void handleCharacter();
-	int OnExecute();
-	bool OnInit();
+	void LevelDesign(bool isRandom);
+	void Logic();
 	void OnEvent(SDL_Event* event);
+	int OnExecute();
+	void OnExit();
+	bool OnInit();
 	void OnLoop();
 	void OnRender();
-	void OnExit();
+	void RenderInGameMenu();
 	void RenderMainMenu();
 	void RenderMenuOption(const char* optionText, int x, int y, int width, int height, SDL_Color textColor);
 	void RenderOptionsMenu();
-	void RenderInGameMenu();
 	void RenderScene();
-	void ResetGame();
-	void Logic();
+	void ResetGame(bool isRandom);
 
 private:
 	int width;
@@ -65,7 +73,5 @@ private:
 	physics::Body* initialBranch;
 	physics::Body* finalBranch;
 	physics::Body* anotherBranch;
-	physics::Body* characterTorso;
-
-	int charId;
+	physics::Body* character;
 };

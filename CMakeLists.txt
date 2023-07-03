@@ -12,4 +12,4 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_executable(main ${SOURCES})
 
 # Link libraries
-target_link_libraries(main PRIVATE GL SDL2 SDL2_ttf m)
+target_link_libraries(main PRIVATE GL SDL2 SDL2_ttf m freeimage)
