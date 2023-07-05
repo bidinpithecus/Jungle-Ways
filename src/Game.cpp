@@ -14,6 +14,8 @@ Game::Game(int width, int height) {
 	glContext = NULL;
 	pFont = nullptr;
 
+	score = 0;
+
 	world.gravity = physics::Vec2(0, 9.81f);
 	world.iterations = 10;
 	world.bodies.reserve(8);
@@ -27,52 +29,105 @@ Game::Game(int width, int height) {
 	character = new physics::Body();
 }
 
-void Game::LevelDesign(bool isRandom) {
+void Game::LevelDesign(bool isRandom, int level) {
+	physics::Vec2 initialBranchPosition = initialBranch->position;
+	physics::Vec2 finalBranchPosition = finalBranch->position;
+	physics::Vec2 characterPosition = character->position;
+
+	int anotherBranchVelocityY = anotherBranch->velocity.y;
+
 	initialBranch->set(physics::Vec2(initialTree->width.x * 2, initialTree->width.y / 20.0f), FLT_MAX);
-	initialBranch->textureId = static_cast<int>(TEXTURE::branch);
+	initialBranch->textureId = branchTextureId;
+
 	finalBranch->set(physics::Vec2(initialBranch->width.x, initialBranch->width.y), FLT_MAX);
-	finalBranch->textureId = static_cast<int>(TEXTURE::branch);
+	finalBranch->textureId = branchTextureId;
+
+	anotherBranch->set(physics::Vec2(initialTree->width.x * 2, initialTree->width.y / 20.0f), FLT_MAX);
+	anotherBranch->textureId = branchTextureId;
+
 	character->width.x = (initialTree->width.y / 20.0f) * 1.5f;
 	character->width.y = 2.5f * character->width.x;
 	character->set(character->width, 0.01f);
-	character->textureId = static_cast<int>(TEXTURE::character);
+	character->textureId = characterTextureId;
 
 	if (isRandom) {
 		initialBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0f + initialBranch->width.x / 2.0f, randomFloat(initialTree->position.y * 0.15f + character->width.y / 2.0f + initialBranch->width.y / 2.0f, initialTree->position.y * 1.875f));
 		finalBranch->position.set(width - initialBranch->position.x, randomFloat(initialTree->position.y * 0.15f + character->width.y / 2.0f + finalBranch->width.y / 2.0f, initialTree->position.y * 1.875f));
+		anotherBranch->velocity.y = randomInt(15 * level, 25 * level);
+	} else {
+		initialBranch->position = initialBranchPosition;
+		finalBranch->position = finalBranchPosition;
+		character->position = characterPosition;
+		anotherBranch->velocity.y = anotherBranchVelocityY;
 	}
 
 	world.add(initialBranch);
 	world.add(finalBranch);
 
-	anotherBranch->set(physics::Vec2(initialTree->width.x * 2, initialTree->width.y / 20.0f), FLT_MAX);
-	anotherBranch->textureId = static_cast<int>(TEXTURE::branch);
 	anotherBranch->position.set(width / 2.0f, height / 2.0f);
 	anotherBranch->velocity.y = 20.0f;
 	world.add(anotherBranch);
 
-	// Character initial position
 	character->friction = 2.0f;
 	character->position.set(initialBranch->position.x, initialBranch->position.y - initialBranch->width.y / 2.0f - character->width.y / 2.0f);
 	world.add(character);
+}
+
+void Game::LoadTextures() {
+    characterTextureId = LoadImageIntoTexture("../assets/sprites/character.png");
+    treeTextureId = LoadImageIntoTexture("../assets/sprites/tree.png");
+    branchTextureId = LoadImageIntoTexture("../assets/sprites/branch.png");
+	backgroundTextureId = LoadImageIntoTexture("../assets/sprites/background.png");
+}
+
+GLuint Game::LoadImageIntoTexture(const char* fileName) {
+    FREE_IMAGE_FORMAT format = FreeImage_GetFileType(fileName, 0);
+    FIBITMAP* image = FreeImage_Load(format, fileName);
+    FIBITMAP* image32bits = FreeImage_ConvertTo32Bits(image);
+    int width = FreeImage_GetWidth(image32bits);
+    int height = FreeImage_GetHeight(image32bits);
+
+    // Generate a new texture ID
+    GLuint textureId;
+    glGenTextures(1, &textureId);
+
+    // Bind the texture
+    glBindTexture(GL_TEXTURE_2D, textureId);
+
+    // Set texture parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Load the image data into the texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(image32bits));
+
+    // Unload the image data
+    FreeImage_Unload(image);
+    FreeImage_Unload(image32bits);
+
+    // Unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Return the texture ID
+    return textureId;
 }
 
 void Game::ResetGame(bool isRandom) {
 	world.clear();
 
 	initialTree->set(physics::Vec2(width / 12.5f, height), FLT_MAX);
-	initialTree->textureId = static_cast<int>(TEXTURE::tree);
+	initialTree->textureId = treeTextureId;
 	initialTree->position.set(width / 12.5f, height / 2.0f);
 	initialTree->friction = 0;
 	world.add(initialTree);
 
 	finalTree->set(physics::Vec2(width / 12.5f, height), FLT_MAX);
-	finalTree->textureId = static_cast<int>(TEXTURE::tree);
+	finalTree->textureId = treeTextureId;
 	finalTree->position.set(width - initialTree->position.x, height / 2.0f);
 	finalTree->friction = 0;
 	world.add(finalTree);
 
-	LevelDesign(isRandom);
+	LevelDesign(isRandom, score + 1);
 }
 
 bool Game::OnInit() {
@@ -104,6 +159,8 @@ bool Game::OnInit() {
 		return false;
 	}
 
+	LoadTextures();
+
 	glEnable(GL_COLOR_MATERIAL);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -130,7 +187,7 @@ int Game::OnExecute() {
 	SDL_Event event;
 	if (!OnInit()) return -1;
 
-	FPSLimiter fps(420);
+	// FPSLimiter fps(420);
 	while(isRunning) {
 		while((SDL_PollEvent(&event)) != 0) {
 			OnEvent(&event);
@@ -138,7 +195,7 @@ int Game::OnExecute() {
 		handleCharacter();
 		OnLoop();
 		OnRender();
-		fps.run();
+		// fps.run();
 	}
 
 	OnExit();
@@ -341,7 +398,7 @@ void Game::RenderInGameMenu() {
 	int optionHeight = menuHeight / optionCount;
 	int optionY = menuY;
 
-	// Option 1: Start Game
+	// Option 1: Resume Game
 	RenderMenuOption("Resume Game", menuX, optionY, menuWidth, optionHeight, textColor);
 	optionY += optionHeight;
 
@@ -360,12 +417,10 @@ void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int
 	int textHeight = surface->h;
 	SDL_FreeSurface(surface);
 
-	// Render the option text
 	SDL_Rect textRect{ x + (width - textWidth) / 2, y + (height - textHeight) / 2, textWidth, textHeight };
 	SDL_RenderCopy(pRenderer, texture, NULL, &textRect);
 	SDL_DestroyTexture(texture);
 
-	// Render the option rectangle boundaries
 	SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
 	SDL_Rect rect{ x, y, width, height };
 	SDL_RenderDrawRect(pRenderer, &rect);
@@ -374,10 +429,16 @@ void Game::RenderMenuOption(const char* optionText, int x, int y, int width, int
 void Game::Logic() {
 	world.step(tick);
 
+	// Maintain the platform on the screen
 	if (world.bodies[anotherBranch->id]->position.y >= height - world.bodies[anotherBranch->id]->width.y / 2.0f) {
 		world.bodies[anotherBranch->id]->velocity.y = -world.bodies[anotherBranch->id]->velocity.y;
 	} else if (world.bodies[anotherBranch->id]->position.y <= world.bodies[anotherBranch->id]->width.y / 2.0f) {
 		world.bodies[anotherBranch->id]->velocity.y = -world.bodies[anotherBranch->id]->velocity.y;
+	}
+
+	// Increase score
+	if (1 == 0) {
+		score++;
 	}
 
 	// World boundaries
@@ -397,20 +458,43 @@ void Game::Logic() {
 
 void Game::RenderScene() {
 	Logic();
+	glClearColor(0.4f, 0.6f, 0.9f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// Sky color
-	glClearColor(135 / 255.0f, 206 / 255.0f, 235 / 255.0f, 1.0f);
-	glColor3f(0, 0, 0);
-	for (int i = 0; i < (int) world.bodies.size(); i++) {
-		world.bodies[i]->draw();
-		world.bodies[character->id]->applyTexture("../assets/sprites/character.png");
-		// if (world.bodies[i]->textureId == static_cast<int>(TEXTURE::branch)) {
-		// 	world.bodies[i]->applyTexture("../assets/sprites/branch.png");
-		// } else if (world.bodies[i]->textureId == static_cast<int>(TEXTURE::character)) {
-		// 	// world.bodies[i]->applyTexture("../assets/sprites/character.png");
-		// } else if (world.bodies[i]->textureId == static_cast<int>(TEXTURE::tree)) {
-		// 	// world.bodies[i]->applyTexture("../assets/sprites/tree.png");
-		// }
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glEnable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, backgroundTextureId);
+	glBegin(GL_POLYGON);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2f(0.0f, 0.0f);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex2f(width, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(width, height);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex2f(0.0f, height);
+	glEnd();
+
+	for (const auto& body : world.bodies) {
+		glBindTexture(GL_TEXTURE_2D, body->textureId);
+
+		glBegin(GL_POLYGON);
+			glTexCoord2f(0.0f, 1.0f);
+			glVertex2f(body->position.x - body->width.x / 2.0f, body->position.y - body->width.y / 2.0f);
+			glTexCoord2f(1.0f, 1.0f);
+			glVertex2f(body->position.x + body->width.x / 2.0f, body->position.y - body->width.y / 2.0f);
+			glTexCoord2f(1.0f, 0.0f);
+			glVertex2f(body->position.x + body->width.x / 2.0f, body->position.y + body->width.y / 2.0f);
+			glTexCoord2f(0.0f, 0.0f);
+			glVertex2f(body->position.x - body->width.x / 2.0f, body->position.y + body->width.y / 2.0f);
+	glEnd();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+
+	glDisable(GL_TEXTURE_2D);
 }
+

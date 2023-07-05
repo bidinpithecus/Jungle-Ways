@@ -10,7 +10,7 @@ namespace physics {
 
 struct Body {
 	int id;
-	int textureId;
+	GLuint textureId;
 
 	Vec2 position;
 	Vec2 velocity;
@@ -28,9 +28,9 @@ struct Body {
 	Body();
 	void set(const Vec2& w, float m);
 	void addForce(const Vec2& f);
-	void draw();
+	void draw() const;
 	void setMass(float m);
-	void applyTexture(const char* fileName);
+	void applyTexture(GLuint textureId);
 };
 
 }

@@ -29,7 +29,9 @@ public:
 	Game(int width, int height);
 
 	void handleCharacter();
-	void LevelDesign(bool isRandom);
+	void LevelDesign(bool isRandom, int level);
+	GLuint LoadImageIntoTexture(const char* fileName);
+	void LoadTextures();
 	void Logic();
 	void OnEvent(SDL_Event* event);
 	int OnExecute();
@@ -56,6 +58,8 @@ private:
 	GAME_STATE gameState;
 	GAME_STATE previousState;
 
+	int score;
+
 	SDL_GLContext glContext;
 	TTF_Font* pFont;
 	SDL_Renderer* pRenderer;
@@ -74,4 +78,9 @@ private:
 	physics::Body* finalBranch;
 	physics::Body* anotherBranch;
 	physics::Body* character;
+
+	GLuint backgroundTextureId;
+    GLuint characterTextureId;
+    GLuint treeTextureId;
+    GLuint branchTextureId;
 };

@@ -1,4 +1,5 @@
 #include "../../include/physics/Body.hpp"
+#include <GL/gl.h>
 
 namespace physics {
 
@@ -55,46 +56,31 @@ void Body::setMass(float m) {
 	}
 }
 
-void Body::applyTexture(const char* fileName) {
-    FREE_IMAGE_FORMAT format = FreeImage_GetFileType(fileName, 0);
-    FIBITMAP* image = FreeImage_Load(format, fileName);
-    FIBITMAP* image32bits = FreeImage_ConvertTo32Bits(image);
-    int width = FreeImage_GetWidth(image32bits);
-    int height = FreeImage_GetHeight(image32bits);
+void Body::applyTexture(GLuint textureId) {
+    this->textureId = textureId;
+}
 
+void Body::draw() const {
     // Bind the texture
     glBindTexture(GL_TEXTURE_2D, textureId);
 
-    // Configurando os parâmetros da textura
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // Draw the object using the texture
+    glBegin(GL_POLYGON);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex2f(position.x - width.x / 2.0f, position.y - width.y / 2.0f);
 
-    // Carregando os dados da imagem na textura
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(image32bits));
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex2f(position.x + width.x / 2.0f, position.y - width.y / 2.0f);
 
-    // Liberando a memória utilizada pelas imagens
-    FreeImage_Unload(image);
-    FreeImage_Unload(image32bits);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex2f(position.x + width.x / 2.0f, position.y + width.y / 2.0f);
 
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex2f(position.x - width.x / 2.0f, position.y + width.y / 2.0f);
+    glEnd();
+
+    // Unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Body::draw() {
-	Mat22 R(rotation);
-	Vec2 x = position;
-	Vec2 h = 0.5f * width;
-
-	Vec2 v1 = x + R * Vec2(-h.x, -h.y);
-	Vec2 v2 = x + R * Vec2( h.x, -h.y);
-	Vec2 v3 = x + R * Vec2( h.x,  h.y);
-	Vec2 v4 = x + R * Vec2(-h.x,  h.y);
-
-	glBegin(GL_POLYGON);
-		glVertex2f(v1.x, v1.y);
-		glVertex2f(v2.x, v2.y);
-		glVertex2f(v3.x, v3.y);
-		glVertex2f(v4.x, v4.y);
-	glEnd();
 }
 
 }
