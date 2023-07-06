@@ -29,7 +29,7 @@ public:
 	Game(int width, int height);
 
 	void handleCharacter();
-	void LevelDesign(bool isRandom, int level);
+	void LevelDesign(bool resetCount);
 	GLuint LoadImageIntoTexture(const char* fileName);
 	void LoadTextures();
 	void Logic();
@@ -44,7 +44,7 @@ public:
 	void RenderMenuOption(const char* optionText, int x, int y, int width, int height, SDL_Color textColor);
 	void RenderOptionsMenu();
 	void RenderScene();
-	void ResetGame(bool isRandom);
+	void ResetGame(bool resetCount);
 
 private:
 	int width;
