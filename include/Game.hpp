@@ -78,9 +78,11 @@ private:
 	physics::Body* finalBranch;
 	physics::Body* anotherBranch;
 	physics::Body* character;
+	physics::Body* fruit;
 
 	GLuint backgroundTextureId;
     GLuint characterTextureId;
     GLuint treeTextureId;
     GLuint branchTextureId;
+    GLuint fruitTextureId;
 };

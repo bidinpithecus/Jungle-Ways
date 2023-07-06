@@ -61,10 +61,8 @@ void Body::applyTexture(GLuint textureId) {
 }
 
 void Body::draw() const {
-    // Bind the texture
     glBindTexture(GL_TEXTURE_2D, textureId);
 
-    // Draw the object using the texture
     glBegin(GL_POLYGON);
     glTexCoord2f(0.0f, 0.0f);
     glVertex2f(position.x - width.x / 2.0f, position.y - width.y / 2.0f);

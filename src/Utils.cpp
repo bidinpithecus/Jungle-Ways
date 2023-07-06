@@ -17,6 +17,10 @@ int randomInt(int min, int max) {
 	return dist(gen);
 }
 
+float newVel(int x) {
+	return 60 * (1 - std::exp(-0.05*x)) + 20;
+}
+
 void loadTextureIntoBody(physics::Body& body, GLuint textureId) {
     body.applyTexture(textureId);
 }

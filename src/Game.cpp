@@ -27,6 +27,7 @@ Game::Game(int width, int height) {
 	finalBranch = new physics::Body();
 	anotherBranch = new physics::Body();
 	character = new physics::Body();
+	fruit = new physics::Body();
 }
 
 void Game::LevelDesign(bool resetCount) {
@@ -44,12 +45,18 @@ void Game::LevelDesign(bool resetCount) {
 	character->set(character->width, 0.01f);
 	character->textureId = characterTextureId;
 
+	fruit->set(physics::Vec2(character->width.x, character->width.x), 0.01f);
+	fruit->textureId = fruitTextureId;
+
 	initialBranch->position.set(initialTree->position.x + initialTree->width.x / 2.0f + initialBranch->width.x / 2.0f, randomFloat(initialTree->position.y * 0.15f + character->width.y / 2.0f + initialBranch->width.y / 2.0f, initialTree->position.y * 1.875f));
 	finalBranch->position.set(width - initialBranch->position.x, randomFloat(initialTree->position.y * 0.15f + character->width.y / 2.0f + finalBranch->width.y / 2.0f, initialTree->position.y * 1.875f));
 	if (resetCount) {
 		score = 0;
 	}
+
 	anotherBranch->velocity.y = randomInt(5 * ((score / 2.0f) + 1), 15 * ((score / 4.0f) + 1));
+	fruit->position.set(finalBranch->position.x, finalBranch->position.y - finalBranch->width.y / 2.0f - fruit->width.y / 2.0f);
+	world.add(fruit);
 
 	world.add(initialBranch);
 	world.add(finalBranch);
@@ -67,6 +74,7 @@ void Game::LoadTextures() {
     treeTextureId = LoadImageIntoTexture("../assets/sprites/tree.png");
     branchTextureId = LoadImageIntoTexture("../assets/sprites/branch.png");
 	backgroundTextureId = LoadImageIntoTexture("../assets/sprites/background.png");
+	fruitTextureId = LoadImageIntoTexture("../assets/sprites/fruit.png");
 }
 
 GLuint Game::LoadImageIntoTexture(const char* fileName) {
@@ -162,18 +170,10 @@ bool Game::OnInit() {
 
 void Game::handleCharacter() {
 	if (keyboardStateArray[SDL_SCANCODE_A]) {
-		if (score >= 0 && score < 4) {
-			world.bodies[character->id]->velocity.x = -20.0f;
-		} else {
-			world.bodies[character->id]->velocity.x = -20.0f * (score / 4.0f);
-		}
+		world.bodies[character->id]->velocity.x = -newVel(score);
 	}
 	if (keyboardStateArray[SDL_SCANCODE_D]) {
-		if (score >= 0 && score < 4) {
-			world.bodies[character->id]->velocity.x = 20.0f;
-		} else {
-			world.bodies[character->id]->velocity.x = 20.0f * (score / 4.0f);
-		}
+		world.bodies[character->id]->velocity.x = newVel(score);
 	}
 	if (keyboardStateArray[SDL_SCANCODE_SPACE] && world.bodies[character->id]->canJump) {
 		world.bodies[character->id]->velocity.y = -40.0f;
@@ -184,7 +184,7 @@ int Game::OnExecute() {
 	SDL_Event event;
 	if (!OnInit()) return -1;
 
-	FPSLimiter fps(505);
+	// FPSLimiter fps(505);
 	while(isRunning) {
 		while((SDL_PollEvent(&event)) != 0) {
 			OnEvent(&event);
@@ -192,7 +192,7 @@ int Game::OnExecute() {
 		handleCharacter();
 		OnLoop();
 		OnRender();
-		fps.run();
+		// fps.run();
 	}
 
 	OnExit();
@@ -292,6 +292,7 @@ void Game::OnExit() {
 	delete finalBranch;
 	delete anotherBranch;
 	delete character;
+	delete fruit;
 	world.clear();
 	TTF_Quit();
 	SDL_Quit();
@@ -428,12 +429,12 @@ void Game::Logic() {
 		world.bodies[anotherBranch->id]->velocity.y = -world.bodies[anotherBranch->id]->velocity.y;
 	}
 
-	int distY = static_cast<int>(abs(world.bodies[character->id]->position.y - (world.bodies[finalBranch->id]->position.y - world.bodies[finalBranch->id]->width.y / 2.0f - world.bodies[character->id]->width.y / 2.0f)));
-	int distX = static_cast<int>(abs(world.bodies[character->id]->position.x - world.bodies[finalBranch->id]->position.x));
-	// Increase score
-	if (distX <= 1 && distY <= 1) {
-		score++;
-		ResetGame(false);
+	for (auto& arb : world.arbiters) {
+		if ((arb.second.body1->id == character->id && arb.second.body2->id == fruit->id) || (arb.second.body2->id == character->id && arb.second.body1->id == fruit->id)) {
+			score++;
+			ResetGame(false);
+			break;
+		}
 	}
 
 	// World boundaries
